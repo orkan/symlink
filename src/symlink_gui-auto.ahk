@@ -1,5 +1,6 @@
 #NoTrayIcon
 #SingleInstance, Force
+#Include symlink.inc.ahk
 
 Gui +Resize +MaximizeBox +MinSize590x200
 
@@ -22,13 +23,17 @@ global EDIT_LNK, EDIT_SRC, EDIT_CMD
 Gui, +OwnDialogs
 Gui, Submit, NoHide
 
+new_lnk := "D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\linbv\"
+parent_lnk := path_get_parent(new_lnk)
 
-MsgBox % "file_isempty: " . file_isempty(EDIT_LNK)
+if (RTrim(parent_lnk, "\") == parent_lnk)
+{
+MsgBox, takie same!
+}
+
+MsgBox % "new_lnk: " . new_lnk . "`n parent_lnk: " . parent_lnk
+
 
 return
 
 
-file_isempty(path) {
-	FileGetSize, isempty, % path
-	return isempty = 0 ? true : false
-}
