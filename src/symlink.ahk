@@ -1,9 +1,19 @@
 ﻿#NoTrayIcon
 #SingleInstance,force
 #Include symlink.inc.ahk
+#Include symlink.lang.inc.ahk
 
-Gui, Add, Text, x12 y15 w40 h20 vLAB_LNK, Link:
-Gui, Add, Text, x12 y45 w40 h20 vLAB_SRC, Target:
+base_name := RegExReplace(A_ScriptName, "(.+?)(\.[^.]*$|$)", "$1")
+name_ini := base_name . ".ini"
+ini := ReadINI(name_ini)
+
+lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
+if (FileExist(lang_ini)) {
+	lang := ReadINI(lang_ini)
+}
+
+Gui, Add, Text, x12 y15 w40 h20 vLAB_LNK, % lang.window.link . ":"
+Gui, Add, Text, x12 y45 w40 h20 vLAB_SRC, % lang.window.target . ":"
 Gui, Add, Text, x12 y72 w40 h20 , CMD:
 Gui, Add, Edit, x52 y13 w490 h20 vEDIT_LNK gonChange_EDIT_LNK, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 Gui, Add, Edit, x52 y43 w490 h20 vEDIT_SRC gonChange_EDIT_SRC, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
@@ -12,6 +22,7 @@ if (A_Args[1])
 if (A_Args[2])
 	GuiControl,, EDIT_SRC, % A_Args[2]
 Gui, Add, Edit, x52 y73 w520 h80 vEDIT_CMD
+build_cmd()
 Gui, Add, Button, x552 y13 w20 h20 vBTN_LNK gonClick_BTN_LNK hwndBTN_LNK,
 Gui, Add, Button, x552 y43 w20 h20 vBTN_SRC gonClick_BTN_SRC hwndBTN_SRC,
 GuiButtonIcon(BTN_LNK, "imageres.dll", 4)
@@ -22,31 +33,44 @@ Gui, Add, Radio, x172 y163 w80 h20 vRAD_FILE_H gonClick_RAD_FILE_H, Hard File (/
 Gui, Add, Radio, x272 y163 w90 h20 vRAD_DIR_H  gonClick_RAD_DIR_H , Hard Dir (/J)
 Gui, Add, Button, x362 y163 w100 h30 vBTN_OK, &OK
 Gui, Add, Button, Default x472 y163 w100 h30 , &Close
-build_cmd()
 
-ini_name := RegExReplace(A_ScriptName, "[^\.]+$") . "ini"
-ini := ReadINI(ini_name)
+Menu, menu_popup, Add, % lang.menu.alwaysontop, onClickMenu_alwaysontop
+Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
+
 Gui, Show,, % "Symlink Creator (Admin mode: " . (A_IsAdmin ? "Yes" : "No") . ")"
-
-WinMove, A,, ini["wnd_position"].appX, ini["wnd_position"].appY, ini["wnd_position"].appW, ini["wnd_position"].appH
+WinMove, A,, ini.pos.x, ini.pos.y, ini.pos.w, ini.pos.h
+WinSet, AlwaysOnTop, % ini.wnd.top, A
 return
 
 GuiEscape:
 ButtonClose:
 GuiClose:
 WinGetPos appX, appY, appW, appH, A
-ini := []
-ini["wnd_position"]
-:= { appX: appX
-   , appY: appY
-   , appW: appW ; Gui > Show: -16px
-   , appH: appH} ; Gui > Show: -35px
-ini["wnd_state"]
-:= { minimized:     0
-   , maximized:     0
-   , alwaysontop:   1 }
-WriteINI(ini, ini_name)
+tmp := []
+tmp.pos
+:= { x: appX
+   , y: appY
+   , w: appW ; Gui > Show: -16px
+   , h: appH} ; Gui > Show: -35px
+tmp.wnd
+:= { min: ini.wnd.min
+   , max: ini.wnd.max
+   , lang: ini.wnd.lang
+   , top: ini.wnd.top }
+WriteINI(tmp, name_ini)
 ExitApp
+
+onClickMenu_alwaysontop:
+ini.wnd.top := ini.wnd.top ? 0 : 1
+WinSet, AlwaysOnTop, % ini.wnd.top, A
+Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
+return
+
+;===========================
+; onContextMenu:
+GuiContextMenu:
+Menu, menu_popup, Show
+return
 
 ;===========================
 ; Drop & Down explorer files onto editboxes

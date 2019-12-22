@@ -1,4 +1,5 @@
 /etc/
+/bin/
 /.settings/
 *.gz
 *.rar
