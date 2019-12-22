@@ -1,1 +1,1 @@
-D:/Orkan/Code/Exe/AutoHotkey/Symlink/test/target.txt
+D:/Orkan/Code/Exe/AutoHotkey/Symlink/test/link3.txt

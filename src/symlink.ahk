@@ -7,6 +7,10 @@ Gui, Add, Text, x12 y45 w40 h20 vLAB_SRC, Target:
 Gui, Add, Text, x12 y72 w40 h20 , CMD:
 Gui, Add, Edit, x52 y13 w490 h20 vEDIT_LNK gonChange_EDIT_LNK, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 Gui, Add, Edit, x52 y43 w490 h20 vEDIT_SRC gonChange_EDIT_SRC, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
+if (A_Args[1])
+	GuiControl,, EDIT_LNK, % A_Args[1]
+if (A_Args[2])
+	GuiControl,, EDIT_SRC, % A_Args[2]
 Gui, Add, Edit, x52 y73 w520 h80 vEDIT_CMD
 Gui, Add, Button, x552 y13 w20 h20 vBTN_LNK gonClick_BTN_LNK hwndBTN_LNK,
 Gui, Add, Button, x552 y43 w20 h20 vBTN_SRC gonClick_BTN_SRC hwndBTN_SRC,
@@ -20,7 +24,8 @@ Gui, Add, Button, x362 y163 w100 h30 vBTN_OK, &OK
 Gui, Add, Button, Default x472 y163 w100 h30 , &Close
 
 build_cmd()
-Gui, Show, w584 h206, Symlink Creator
+Gui, Show, w584 h206, % "Symlink Creator (Admin mode: " . (A_IsAdmin ? "Yes" : "No") . ")"
+
 return
 
 GuiEscape:
@@ -58,9 +63,9 @@ onClick_BTN_SRC:
 Gui, +OwnDialogs
 Gui, Submit, NoHide
 
-dir := "C:\"
+dir_def := dir_root := "C:\"
 edit_id := StrReplace(A_GuiControl, "BTN", "EDIT")
-edit_txt := path_validate(%edit_id%) ; extract variable reference
+edit_txt := RTrim(%edit_id%, "\") ; extract variable reference
 
 Loop { ; find the nearest valid path (going UPward)
 	if (!edit_txt) ; empty edit, go with defaults
@@ -68,28 +73,28 @@ Loop { ; find the nearest valid path (going UPward)
 
 	path_info := FileExist(edit_txt) ; path is found !!!
 	if (path_info) {
-		dir := edit_txt
+		dir_out := edit_txt
 
 		if (InStr(path_info, "D")) {
-			root_dir :=  dir
+			dir_root :=  dir_out
 		}
 		else {
-			root_dir :=  path_get_parent(dir) ; find root dir for a File/FolderSelect() modal
+			dir_root :=  path_get_parent(dir_out) ; find root dir for a File/FolderSelect() modal
 		}
 		
 		break
 	}
-	edit_txt := RegExReplace(edit_txt, "[^\\]+\\?$")
+	edit_txt := RegExReplace(edit_txt, "[^\\]+\\?$") ; remove last dir from path string
 }
 
 if (RAD_FILE || RAD_FILE_H)
-	FileSelectFile, dir, 3, % root_dir
+	FileSelectFile, dir_out, 32, % dir_root
 else
-	FileSelectFolder, dir, % "*" . root_dir, 3
+	FileSelectFolder, dir_out, % "*" . dir_root, 3
 
 ; save new path - if not empty
-if (dir) { 
-	GuiControl,, % edit_id , % dir
+if (dir_out) { 
+	GuiControl,, % edit_id , % dir_out
 }
 
 build_cmd()
@@ -103,6 +108,7 @@ return
 ButtonOK:
 global EDIT_LNK, EDIT_SRC, EDIT_CMD
 Gui, +OwnDialogs
+Gui, Submit, NoHide
 
 errors := build_cmd(true)
 
@@ -113,9 +119,127 @@ if (!errors) {
 			return
 	}
 	
-	output := RunWait_output(EDIT_CMD)
-	MsgBox output: %output%
+	output := RunWaitMany(EDIT_CMD)
+	if (output)
+		MsgBox, 64, Output, % output
+	else
+		MsgBox, 48, No output, Try to run this program with Administrator privileges.
 }
 
 return
+
+;###################################################################################################
+; FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS 
+;###################################################################################################
+
+;===========================
+; validate user input, optionally show error msg or update cmd line
+build_cmd(out_msg := false, out_cmd := true) {
+	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, EDIT_LNK, EDIT_SRC, EDIT_CMD
+	Gui, Submit, NoHide
+	
+	new_cmd := ""
+	errors := 0
+	is_dir := RAD_DIR || RAD_DIR_H
+	fs_type := is_dir ? "directory" : "file"
+	
+	new_lnk := EDIT_LNK
+	new_src := EDIT_SRC
+	
+	apply_control("LAB_LNK", "+cDefault")
+	apply_control("LAB_SRC", "+cDefault")
+	
+	;===========================
+	; MAIN checks...
+	if (new_lnk != "" && new_src != "" && new_lnk == new_src) {
+		apply_control("LAB_LNK", "+cRed")
+		apply_control("LAB_SRC", "+cRed")
+		_msg(out_msg, "Error", "The <link> and <target> are the same!")
+		errors++
+		return errors
+	}
+
+	;===========================
+	; LINK checks...
+	if (new_lnk != "")
+	{
+		if (path_exist(is_dir, new_lnk))
+		{
+			if (check_isempty(is_dir, new_lnk))
+			{
+				_cmd(out_cmd, new_cmd, cmd_remove(is_dir, new_lnk))
+			}
+			else
+			{
+				apply_control("LAB_LNK", "+cRed")
+				_msg(out_msg, "Error", "The <link:" . fs_type . "> is not empty:`n" . new_lnk)
+				errors++
+			}
+		}
+		else if (FileExist(new_lnk)) ; path exists but its different type: file <=> dir
+		{
+			apply_control("LAB_LNK", "+cRed")
+			_msg(out_msg, "Error", "The <link:" . fs_type . "> is overriding existing:`n" . new_lnk)
+			errors++
+		}
+		else 
+		{
+			parent_lnk := path_get_parent(new_lnk)
+			
+			if (RTrim(new_lnk, "\") == parent_lnk) {
+				apply_control("LAB_LNK", "+cRed")
+				_msg(out_msg, "Error", "The <link> name is missing")
+				errors++
+			}
+			else {
+				; create parent folder if not exists
+				if (parent_lnk && !path_exist(true, parent_lnk)) {
+					apply_control("LAB_LNK", "+cGreen")
+					_msg(out_msg, "Info", "The <link> directory path will be created:`n" . parent_lnk)
+					_cmd(out_cmd, new_cmd, "MKDIR " . parent_lnk)
+				}
+			}
+			
+		}
+	}
+	else
+	{
+		;apply_control("LAB_LNK", "+cRed")
+		_msg(out_msg, "Error", "The <link> path is empty!")
+		errors++
+	}
+	
+	;===========================
+	; TARGET checks...
+	if (new_src != "")
+	{
+		if (!path_exist(is_dir, new_src)) {
+			apply_control("LAB_SRC", "+cRed")
+			_msg(out_msg, "Warning", "The <target:" . fs_type . "> path doesn't exist:`n" . new_src)
+			errors++
+		}
+	}
+	else
+	{
+		;apply_control("LAB_LNK", "+cRed")
+		_msg(out_msg, "Error", "The <target> path is empty!")
+		errors++
+	}
+
+	
+	;===========================
+	; MKLINE cmd
+	if (out_cmd) {
+		switch := !RAD_FILE   ? switch : " "
+		switch := !RAD_DIR    ? switch : " /D"
+		switch := !RAD_FILE_H ? switch : " /H"
+		switch := !RAD_DIR_H  ? switch : " /J"
+
+		new_cmd .= "MKLINK" . switch . " """ . new_lnk . """ """ . new_src . """"
+		GuiControl,, EDIT_CMD , % new_cmd
+		;Gui, Submit, NoHide
+	}
+	
+	return errors
+}
 

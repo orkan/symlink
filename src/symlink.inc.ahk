@@ -1,111 +1,6 @@
-;###################################################################################################
-; FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS 
-;###################################################################################################
-
-;===========================
-; validate user input, optionally show error msg or update cmd line
-build_cmd(out_msg := false, out_cmd := true) {
-	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, EDIT_LNK, EDIT_SRC, EDIT_CMD
-	Gui, Submit, NoHide
-	
-	new_cmd := ""
-	errors := 0
-	is_dir := RAD_DIR || RAD_DIR_H
-	fs_type := is_dir ? "directory" : "file"
-	
-	new_lnk := path_validate(EDIT_LNK)
-	new_src := path_validate(EDIT_SRC)
-	
-	apply_control("LAB_LNK", "+cDefault")
-	apply_control("LAB_SRC", "+cDefault")
-	
-	;===========================
-	; MAIN checks...
-	if (new_lnk != "" && new_src != "" && new_lnk == new_src) {
-		apply_control("LAB_LNK", "+cRed")
-		apply_control("LAB_SRC", "+cRed")
-		_msg(out_msg, "Error", "The <link> and <target> are the same!")
-		errors++
-		return errors
-	}
-
-	;===========================
-	; LINK checks...
-	if (new_lnk != "")
-	{
-		if (path_exist(is_dir, new_lnk))
-		{
-			if (check_isempty(is_dir, new_lnk))
-			{
-				_cmd(out_cmd, new_cmd, cmd_remove(is_dir, new_lnk))
-			}
-			else
-			{
-				apply_control("LAB_LNK", "+cRed")
-				_msg(out_msg, "Error", "The <link:" . fs_type . "> is not empty:`n" . new_lnk)
-				errors++
-			}
-		}
-		else 
-		{
-			parent_lnk := path_get_parent(new_lnk)
-			
-			if (RTrim(new_lnk, "\") == parent_lnk) {
-				apply_control("LAB_LNK", "+cRed")
-				_msg(out_msg, "Error", "The <link> name is missing")
-				errors++
-			}
-			else {
-				; create parent folder if not exists
-				if (!path_exist(true, parent_lnk)) {
-					apply_control("LAB_LNK", "+cGreen")
-					_msg(out_msg, "Info", "The parent <link> path will be created:`n" . parent_lnk)
-					_cmd(out_cmd, new_cmd, "MKDIR " . parent_lnk)
-				}
-			}
-			
-		}
-	}
-	else
-	{
-		;apply_control("LAB_LNK", "+cRed")
-		_msg(out_msg, "Error", "The <link> path is empty!")
-		errors++
-	}
-	
-	;===========================
-	; TARGET checks...
-	if (new_src != "")
-	{
-		if (!path_exist(is_dir, new_src)) {
-			apply_control("LAB_SRC", "+cRed")
-			_msg(out_msg, "Warning", "The <target:" . fs_type . "> path doesn't exist:`n" . new_src)
-			errors++
-		}
-	}
-	else
-	{
-		;apply_control("LAB_LNK", "+cRed")
-		_msg(out_msg, "Error", "The <target> path is empty!")
-		errors++
-	}
-
-	
-	;===========================
-	; MKLINE cmd
-	if (out_cmd) {
-		switch := !RAD_FILE   ? switch : " "
-		switch := !RAD_DIR    ? switch : " /D"
-		switch := !RAD_FILE_H ? switch : " /H"
-		switch := !RAD_DIR_H  ? switch : " /J"
-
-		new_cmd .= "MKLINK" . switch . " """ . new_lnk . """ """ . new_src . """"
-		GuiControl,, EDIT_CMD , % new_cmd
-		;Gui, Submit, NoHide
-	}
-	
-	return errors
-}
+;DEBUG
+;~ ListVars
+;~ Pause
 
 ;===========================
 ; remove dir
@@ -140,7 +35,7 @@ check_isempty(is_dir, path) {
 ; Dir is empty?
 ; Return true only if dir is empty or is symlink
 dir_isempty(path) {
-	path := path_validate(path)
+	path := RTrim(path, "\")
 	Loop %path%\*.*, 0, 1
 		return path_issymlink(path)
 	return true
@@ -167,26 +62,15 @@ path_issymlink(path) {
 ;===========================
 ; File is readonly?
 file_isreadonly(path) {
-	attr := FileExist(path)
-	return InStr(attr, "R")
+	return InStr(FileExist(path), "R")
 }
 
 ;===========================
 ; test if file/dir path exists
-path_exist(is_dir, s) {
-	exists := FileExist(s)
-	return exists
-	
-	; no point for distinguish file - directory
-	isdir := InStr(exists, "D")
-	return is_dir ? isdir : exists && !isdir
-}
-
-;===========================
-; Make path valid
-path_validate(path) {
-	;return RTrim(path, "\")
-	return path
+path_exist(is_dir, path) {
+	attr := FileExist(path)
+	isdir := InStr(attr, "D")
+	return is_dir ? isdir : attr && !isdir
 }
 
 ;===========================
@@ -233,9 +117,10 @@ GuiButtonIcon(Handle, File, Index := 1, Options := "")
 	return IL_Add( normal_il, File, Index )
 }
 
-;===========================
-; RunWait Examples
-; return output string
+;###################################################################################################
+; AutoHotkey HELP: RunWait Examples
+; https://www.autohotkey.com/boards/viewtopic.php?t=60756&p=268738
+;###################################################################################################
 RunWait_output(command) {
     return "Debuging..."
 	
@@ -244,5 +129,14 @@ RunWait_output(command) {
     ; Execute a single command via cmd.exe
     exec := shell.Exec(ComSpec " /C " command)
     ; Read and return the command's output
+    return exec.StdOut.ReadAll()
+}
+RunWaitMany(commands) {
+    shell := ComObjCreate("WScript.Shell")
+    ; Open cmd.exe with echoing of commands disabled
+    exec := shell.Exec(ComSpec " /Q /K echo off")
+    ; Send the commands to execute, separated by newline
+    exec.StdIn.WriteLine(commands "`nexit")  ; Always exit at the end!
+    ; Read and return the output of all commands
     return exec.StdOut.ReadAll()
 }
