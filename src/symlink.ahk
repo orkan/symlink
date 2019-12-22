@@ -22,15 +22,30 @@ Gui, Add, Radio, x172 y163 w80 h20 vRAD_FILE_H gonClick_RAD_FILE_H, Hard File (/
 Gui, Add, Radio, x272 y163 w90 h20 vRAD_DIR_H  gonClick_RAD_DIR_H , Hard Dir (/J)
 Gui, Add, Button, x362 y163 w100 h30 vBTN_OK, &OK
 Gui, Add, Button, Default x472 y163 w100 h30 , &Close
-
 build_cmd()
-Gui, Show, w584 h206, % "Symlink Creator (Admin mode: " . (A_IsAdmin ? "Yes" : "No") . ")"
 
+ini_name := RegExReplace(A_ScriptName, "[^\.]+$") . "ini"
+ini := ReadINI(ini_name)
+Gui, Show,, % "Symlink Creator (Admin mode: " . (A_IsAdmin ? "Yes" : "No") . ")"
+
+WinMove, A,, ini["wnd_position"].appX, ini["wnd_position"].appY, ini["wnd_position"].appW, ini["wnd_position"].appH
 return
 
 GuiEscape:
 ButtonClose:
 GuiClose:
+WinGetPos appX, appY, appW, appH, A
+ini := []
+ini["wnd_position"]
+:= { appX: appX
+   , appY: appY
+   , appW: appW ; Gui > Show: -16px
+   , appH: appH} ; Gui > Show: -35px
+ini["wnd_state"]
+:= { minimized:     0
+   , maximized:     0
+   , alwaysontop:   1 }
+WriteINI(ini, ini_name)
 ExitApp
 
 ;===========================
