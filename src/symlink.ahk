@@ -1,15 +1,17 @@
 ﻿#NoTrayIcon
 #SingleInstance,force
 #Include symlink.inc.ahk
+#Include symlink.def.inc.ahk
 #Include symlink.lang.inc.ahk
 
 base_name := RegExReplace(A_ScriptName, "(.+?)(\.[^.]*$|$)", "$1")
 name_ini := base_name . ".ini"
-ini := ReadINI(name_ini)
-
+if (FileExist(name_ini)) {
+	ini := ReadINI(name_ini) ; overwrites symlink.def.inc.ahk
+}
 lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
 if (FileExist(lang_ini)) {
-	lang := ReadINI(lang_ini)
+	lang := ReadINI(lang_ini) ; overwrites symlink.lang.inc.ahk
 }
 
 Gui, Add, Text, x12 y15 w40 h20 vLAB_LNK, % lang.window.link . ":"
@@ -38,6 +40,9 @@ Menu, menu_popup, Add, % lang.menu.alwaysontop, onClickMenu_alwaysontop
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 
 Gui, Show,, % "Symlink Creator (Admin mode: " . (A_IsAdmin ? "Yes" : "No") . ")"
+; WinMove instead of Gui, Show size params because of incosistency of size values (borders, etc...)
+; Gui > Show, w: -16px
+; Gui > Show, h: -35px
 WinMove, A,, ini.pos.x, ini.pos.y, ini.pos.w, ini.pos.h
 WinSet, AlwaysOnTop, % ini.wnd.top, A
 return
@@ -45,19 +50,13 @@ return
 GuiEscape:
 ButtonClose:
 GuiClose:
-WinGetPos appX, appY, appW, appH, A
-tmp := []
-tmp.pos
-:= { x: appX
-   , y: appY
-   , w: appW ; Gui > Show: -16px
-   , h: appH} ; Gui > Show: -35px
-tmp.wnd
-:= { min: ini.wnd.min
-   , max: ini.wnd.max
-   , lang: ini.wnd.lang
-   , top: ini.wnd.top }
-WriteINI(tmp, name_ini)
+WinGetPos tmpX, tmpY, tmpW, tmpH, A
+ini.pos
+:= { x: tmpX
+   , y: tmpY
+   , w: tmpW ; Gui > Show: -16px
+   , h: tmpH} ; Gui > Show: -35px
+WriteINI(ini, name_ini)
 ExitApp
 
 onClickMenu_alwaysontop:
