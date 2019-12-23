@@ -1,7 +1,33 @@
 ;DEBUG
 ;~ ListVars
 ;~ Pause
+;
+;~ MsgBox % "k: " . k . "`n v: " . v
+;
+;~ #Include D:\Orkan\Code\Exe\AutoHotkey\Symlink\lib\wolf_II - CustomBoxes.2018\TreeBox.ahk
+;~ TreeBox(ini, "ini")
+;~ MsgBox, object from ini
 
+;===========================
+; save window position to ini
+save_pos() {
+	global ini
+	WinGetPos tmpX, tmpY, tmpW, tmpH, A
+	ini.pos
+	:= { x: tmpX
+	   , y: tmpY
+	   , w: tmpW ; Gui > Show: -16px
+	   , h: tmpH} ; Gui > Show: -35px
+}
+;===========================
+; save radiobutons state to ini
+save_rad() {
+	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, ini
+	Gui, Submit, NoHide
+
+	for key, val in ini.rad
+		ini.rad[key] := %key%
+}
 ;===========================
 ; remove dir
 cmd_remove(is_dir, path) {
@@ -18,10 +44,11 @@ _cmd(append, ByRef buff, cmd) {
 
 ;===========================
 ; Visualize future errors
-_msg(show, key, msg) {
+_msg(show, type, str) {
+	global lang
 	if (show) {
-		arr := {Error: 16, Warning: 48, Info: 64}
-		MsgBox, % arr[key], % key, % msg
+		arr := {error: 16, warning: 48, info: 64}
+		MsgBox, % arr[type], % lang.msg[type], % str
 	}
 }
 
@@ -87,7 +114,32 @@ apply_control(el, set) {
 	GuiControl %set% +Redraw, %el%
 }
 
+;===========================
+; Merge 2 objects recursively
+object_merge(o1, o2) {
+	for, k, v in o2
+		o1[k] := isobject(v) ? object_merge(o1[k], v) : v
+	return o1
+}
 
+;===========================
+; Load user settings from ini file and merge it with given array
+merge_from_ini(obj, name) {
+	if (FileExist(name)) {
+		obj := object_merge(obj, ReadINI(name)) ; overwrites symlink.def.inc.ahk
+	}
+	return obj
+}
+
+;===========================
+; pseudo sprintf
+printf(msg, args*) {
+    for each, s in args
+        msg := StrReplace(msg, "%s", s,, 1)
+	
+	msg := StrReplace(msg, "\n", "`n")
+    return msg
+}
 ;###################################################################################################
 ; EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL EXTERNAL 
 ;###################################################################################################
