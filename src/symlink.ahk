@@ -4,6 +4,8 @@
 #Include symlink.def.inc.ahk
 #Include symlink.lang.inc.ahk
 
+version := "v0.1.0"
+
 base_name := RegExReplace(A_ScriptName, "(.+?)(\.[^.]*$|$)", "$1")
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
@@ -13,11 +15,11 @@ lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
 lang := merge_from_ini(lang, lang_ini)
 
 Gui, Add, Text, x10 y15 w40 h20 vLAB_LNK, % lang.window.link . ":"
-Gui, Add, Edit, x52 y13 w490 h20 vEDIT_LNK gonChange_EDIT_LNK, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
+Gui, Add, Edit, x52 y13 w490 h20 vEDIT_LNK gonChange_EDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 
 Gui, Add, Text, x10 y45 w40 h20 vLAB_SRC, % lang.window.target . ":"
-Gui, Add, Edit, x52 y43 w490 h20 vEDIT_SRC gonChange_EDIT_SRC, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
-; get command line args
+Gui, Add, Edit, x52 y43 w490 h20 vEDIT_SRC gonChange_EDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
+; get command line args (Menu > View > Parameters (Shift+F8))
 if (A_Args[1])
 	GuiControl,, EDIT_LNK, % A_Args[1]
 if (A_Args[2])
@@ -45,69 +47,20 @@ Gui, Add, Radio, x262 y163 w100 h20 vRAD_DIR_H  gonClick_RAD_DIR_H 	Checked%chRA
 Gui, Add, Button, x362 y163 w100 h30 vBTN_OK gonClick_BTN_OK, % lang.window.btnok
 Gui, Add, Button, Default x472 y163 w100 h30 gonClick_BTN_CLOSE, % lang.window.btnclose
 
-Gui, Add, Picture, x10 y121 w32 h32, ..\res\shell32.dll,16769.ico ; only linked!
+;Gui, Add, Picture, x10 y121 w32 h32, ..\res\shell32.dll,16769.ico ; only linked!
 
 Menu, menu_popup, Add, % lang.menu.alwaysOnTop, onClickMenu_alwaysOnTop
 Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
-build_cmd()
+show_cmd()
 
-Gui, Show,, % "Symlink Creator (" . lang.window.adminmode . ": " . (A_IsAdmin ? lang.window.yes : lang.window.no) . ")"
+Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
 ; WinMove instead of Gui, Show size params because of incosistency of size values (borders, etc...)
 ; Gui > Show, w: -16px
 ; Gui > Show, h: -35px
 WinMove, A,, ini.pos.x, ini.pos.y, ini.pos.w, ini.pos.h
 WinSet, AlwaysOnTop, % ini.wnd.top, A
-
-OnMessage(0x201, "WM_LBUTTONDOWN")
-OnMessage(0x2A1, "WM_MOUSEHOVER")
 return
-
-WM_LBUTTONDOWN(wParam, lParam)
-{
-    X := lParam & 0xFFFF
-    Y := lParam >> 16
-    if A_GuiControl
-        Ctrl := "`n(in control " . A_GuiControl . ")"
-    ToolTip You left-clicked in Gui window #%A_Gui% at client coordinates %X%x%Y%.%Ctrl%
-}
-
-WM_MouseOver()
-{
-	global old_GuiControl, LAB_LNK ; define as global so it survives untill next MOUSEMOVE
-	global Tooltip
-	If A_GuiControl = LAB_LNK
-		Tooltip = New Script
-	If A_GuiControl = OpenPic
-		Tooltip = Open
-	If A_GuiControl = SavePic
-		Tooltip = Save Script
-	If A_GuiControl = TestPic
-		Tooltip = Test Script
-	If A_GuiControl = FindPic
-		Tooltip = Find/Replace
-	If A_GuiControl = PrefsPic
-		Tooltip = Preferences
-	If A_GuiControl = HelpPic
-		Tooltip = AHK Help
-	If A_GuiControl =     ; mouse is over nothing
-		Tooltip =
-	If A_GuiControl = MainEdit ; mouse is over mainedit
-		Tooltip =
-	Tooltip, %tooltip%
-	SetTimer, RemoveToolTip, 5000
-	if A_Guicontrol = %Old_GuiControl% ; the mouse is above the same thing it was last MOUSEMOVE
-		return
-}
-
-ToolTip, Timed ToolTip`nThis will be displayed for 5 seconds.
-SetTimer, RemoveToolTip, -5000
-return
-
-RemoveToolTip:
-ToolTip
-return
-
 
 GuiClose:
 GuiEscape:
@@ -151,12 +104,12 @@ is_filelink := A_GuiControl = "RAD_FILE" || A_GuiControl = "RAD_FILE_H"
 icon_browse := is_filelink ? 3 : 4
 GuiButtonIcon(BTN_LNK, "imageres.dll", icon_browse)
 GuiButtonIcon(BTN_SRC, "imageres.dll", icon_browse)
-build_cmd()
+show_cmd()
 return
 
 onChange_EDIT_LNK: ; gonChange_EDIT_LNK
 onChange_EDIT_SRC: ; gonChange_EDIT_SRC
-build_cmd()
+show_cmd()
 return
 
 ;==============================================================================================
@@ -178,13 +131,11 @@ Loop { ; find the nearest valid path (going UPward)
 	if (path_info) {
 		dir_out := edit_txt
 
-		if (InStr(path_info, "D")) {
+		if (InStr(path_info, "D"))
 			dir_root :=  dir_out
-		}
-		else {
+		else
 			dir_root :=  path_get_parent(dir_out) ; find root dir for a File/FolderSelect() modal
-		}
-		
+
 		break
 	}
 	edit_txt := RegExReplace(edit_txt, "[^\\]+\\?$") ; remove last dir from path string
@@ -213,41 +164,68 @@ global EDIT_LNK, EDIT_SRC, EDIT_CMD
 Gui, +OwnDialogs
 Gui, Submit, NoHide
 
-errors := build_cmd(true)
+result := build_cmd()
 
-if (!errors) {
+if (result.err.Length())
+{
+	for k, v in result.err {
+		_msg(v.msg . (v.src ? ":`n" . v.src : ""), v.cap)
+	}
+}
+else
+{
 	if (FileExist(EDIT_LNK)) {
 		MsgBox, 305, Confirm Delete, Replace %EDIT_LNK%?
 		IfMsgBox Cancel
 			return
 	}
 	
-	output := RunWaitMany(EDIT_CMD)
+	output := RunWaitMany(implode(result.cmd, "`n"))
 	if (output)
-		MsgBox, 64, Output, % output
+		_msg(printf(lang.msg.mkOutput, output), "info")
 	else
-		MsgBox, 48, No output, Try to run this program with Administrator privileges.
+		_msg(printf(lang.msg.mkNoOutput), "error")
 }
-
 return
 
 ;###################################################################################################
 ; FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS 
 ;###################################################################################################
-
+show_cmd() {
+	result := build_cmd()
+	out := []
+	
+	if (result.err.Length()) {
+		apply_control("EDIT_CMD", "+cRed")
+		for k, v in result.err
+			out.Push(A_Index . ". " . v.msg)
+	}
+	else {
+		apply_control("EDIT_CMD", "+cDefault")
+		out := result.cmd
+	}
+	
+	GuiControl,, EDIT_CMD , % implode(out, "`n")
+}
 ;===========================
-; validate user input, optionally show error msg or update cmd line
-build_cmd(show_msg := false, show_cmd := true) {
+; validate user input to output array:
+; arr := []
+; arr.err
+; := [{cap: "error",   msg: "A message", src: "D:\path\to\file1.txt"}
+;    ,{cap: "warning", msg: "A message"}
+;    ,{cap: "info",    msg: "A message", src: "D:\path\to\file2.txt"}]
+; arr.cmd
+; := ["cmd1", "cmd2", "cmd3"]
+build_cmd() {
 	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, EDIT_LNK, EDIT_SRC, EDIT_CMD, lang
 	Gui, Submit, NoHide
 	
-	new_cmd := ""
-	errors := 0
-	is_dir := RAD_DIR || RAD_DIR_H
-	fs_type := is_dir ? lang.window.dir : lang.window.file
-	
+	out := {err: [], cmd: []}
 	new_lnk := EDIT_LNK
 	new_src := EDIT_SRC
+	
+	is_dir := RAD_DIR || RAD_DIR_H
+	fs_type := is_dir ? lang.window.dir : lang.window.file
 	
 	apply_control("LAB_LNK", "+cDefault")
 	apply_control("LAB_SRC", "+cDefault")
@@ -257,9 +235,8 @@ build_cmd(show_msg := false, show_cmd := true) {
 	if (new_lnk != "" && new_src != "" && new_lnk == new_src) {
 		apply_control("LAB_LNK", "+cRed")
 		apply_control("LAB_SRC", "+cRed")
-		_msg(show_msg, "error", printf(lang.msg.sameLinkTarget))
-		errors++
-		return errors
+		out.err.Push({cap: "error", msg: printf(lang.msg.sameLinkTarget)})
+		return out
 	}
 
 	;===========================
@@ -270,22 +247,18 @@ build_cmd(show_msg := false, show_cmd := true) {
 		{
 			if (check_isempty(is_dir, new_lnk))
 			{
-				_cmd(show_cmd, new_cmd, cmd_remove(is_dir, new_lnk))
+				out.cmd.Push(cmd_remove(is_dir, new_lnk))
 			}
-			; <link> is not empty
-			else
+			else ; <link> is not empty
 			{
 				apply_control("LAB_LNK", "+cRed")
-				_msg(show_msg, "error", printf(lang.msg.notEmptyLink, fs_type, new_lnk))
-				errors++
+				out.err.Push({cap: "error", msg: printf(lang.msg.notEmptyLink, fs_type), src: new_lnk})
 			}
 		}
-		; path exists but its different type: file <=> dir
-		else if (FileExist(new_lnk))
+		else if (FileExist(new_lnk)) ; path exists but its different type: file <=> dir
 		{
 			apply_control("LAB_LNK", "+cRed")
-			_msg(show_msg, "error", printf(lang.msg.overrideLink, fs_type, new_lnk))
-			errors++
+			out.err.Push({cap: "error", msg: printf(lang.msg.overrideLink, fs_type), src: new_lnk})
 		}
 		else 
 		{
@@ -294,25 +267,22 @@ build_cmd(show_msg := false, show_cmd := true) {
 			; The <link> name is missing - path ending with \
 			if (RTrim(new_lnk, "\") == parent_lnk) {
 				apply_control("LAB_LNK", "+cRed")
-				_msg(show_msg, "error", printf(lang.msg.missingLink, fs_type, new_lnk))
-				errors++
+				out.err.Push({cap: "error", msg: printf(lang.msg.missingLink, fs_type), src: new_lnk})
 			}
 			else {
 				; create parent folder if not exists
 				if (parent_lnk && !path_exist(true, parent_lnk)) {
 					apply_control("LAB_LNK", "+cGreen")
-					_msg(show_msg, "info", printf(lang.msg.newPathLink, fs_type, new_lnk))
-					_cmd(show_cmd, new_cmd, "MKDIR " . parent_lnk)
+					out.err.Push({cap: "info", msg: printf(lang.msg.newPathLink, fs_type), src: new_lnk})
+					out.cmd.Push("MKDIR " . parent_lnk)
 				}
 			}
-			
 		}
 	}
 	else
 	{
 		;apply_control("LAB_LNK", "+cRed")
-		_msg(show_msg, "error", printf(lang.msg.emptyLink, fs_type, new_lnk))
-		errors++
+		out.err.Push({cap: "error", msg: printf(lang.msg.emptyLink, fs_type), src: new_lnk})
 	}
 	
 	;===========================
@@ -321,31 +291,22 @@ build_cmd(show_msg := false, show_cmd := true) {
 	{
 		if (!path_exist(is_dir, new_src)) {
 			apply_control("LAB_SRC", "+cRed")
-			_msg(show_msg, "warning", printf(lang.msg.missingTarget, fs_type, new_src))
-			errors++
+			out.err.Push({cap: "warning", msg: printf(lang.msg.missingTarget, fs_type), src: new_src})
 		}
 	}
 	else
 	{
 		;apply_control("LAB_LNK", "+cRed")
-		_msg(show_msg, "error", printf(lang.msg.emptyTarget, fs_type, new_src))
-		errors++
+		out.err.Push({cap: "error", msg: printf(lang.msg.emptyTarget, fs_type), src: new_src})
 	}
-
 	
 	;===========================
-	; MKLINE cmd
-	if (show_cmd) {
-		switch := !RAD_FILE   ? switch : " "
-		switch := !RAD_DIR    ? switch : " /D"
-		switch := !RAD_FILE_H ? switch : " /H"
-		switch := !RAD_DIR_H  ? switch : " /J"
+	; MKLINK
+	switch := !RAD_FILE   ? switch : ""
+	switch := !RAD_DIR    ? switch : "/D"
+	switch := !RAD_FILE_H ? switch : "/H"
+	switch := !RAD_DIR_H  ? switch : "/J"
+	out.cmd.Push("MKLINK " . switch . " """ . new_lnk . """ """ . new_src . """")
 
-		new_cmd .= "MKLINK" . switch . " """ . new_lnk . """ """ . new_src . """"
-		GuiControl,, EDIT_CMD , % new_cmd
-		;Gui, Submit, NoHide
-	}
-	
-	return errors
+	return out
 }
-

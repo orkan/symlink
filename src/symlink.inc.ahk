@@ -35,21 +35,11 @@ cmd_remove(is_dir, path) {
 }
 
 ;===========================
-; collect commands in a given buffor
-_cmd(append, ByRef buff, cmd) {
-	if (append) {
-		buff .= cmd . "`n"
-	}
-}
-
-;===========================
 ; Visualize future errors
-_msg(show, type, str) {
+_msg(str, type:=64) {
 	global lang
-	if (show) {
-		arr := {error: 16, warning: 48, info: 64}
-		MsgBox, % arr[type], % lang.msg[type], % str
-	}
+	arr := {error: 16, warning: 48, info: 64}
+	MsgBox, % arr[type], % lang.msg[type], % str
 }
 
 ;===========================
@@ -118,8 +108,21 @@ apply_control(el, set) {
 ; Merge 2 objects recursively
 object_merge(o1, o2) {
 	for, k, v in o2
-		o1[k] := isobject(v) ? object_merge(o1[k], v) : v
+		o1[k] := IsObject(v) ? object_merge(o1[k], v) : v
 	return o1
+}
+
+;===========================
+; Merge 2 objects recursively
+implode(arr, str) {
+	len := arr.Length()
+	if !len
+		return ""
+	
+	Loop % len - 1
+		s .= arr[A_Index] . str
+	
+	return s . arr[len]
 }
 
 ;===========================
@@ -173,16 +176,6 @@ GuiButtonIcon(Handle, File, Index := 1, Options := "")
 ; AutoHotkey HELP: RunWait Examples
 ; https://www.autohotkey.com/boards/viewtopic.php?t=60756&p=268738
 ;###################################################################################################
-RunWait_output(command) {
-    return "Debuging..."
-	
-	; WshShell object: http://msdn.microsoft.com/en-us/library/aew9yb99¬
-    shell := ComObjCreate("WScript.Shell")
-    ; Execute a single command via cmd.exe
-    exec := shell.Exec(ComSpec " /C " command)
-    ; Read and return the command's output
-    return exec.StdOut.ReadAll()
-}
 RunWaitMany(commands) {
     shell := ComObjCreate("WScript.Shell")
     ; Open cmd.exe with echoing of commands disabled

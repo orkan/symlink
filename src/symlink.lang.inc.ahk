@@ -16,18 +16,18 @@ lang.window
    , dir: "dir" }
 lang.menu
 := { alwaysontop: "&Always on top"
-   , swaplinktarget: "&Swap: link <-> target"}
+   , swaplinktarget: "&Swap link <> target"}
 lang.msg
 := { error: "Error"
    , warning: "Warning"
    , info: "Info"
    , sameLinkTarget: "The <Link> and <Target> are the same!"
-   , notEmptyLink: "The <Link:%s> is not empty:\n%s"
-   , overrideLink: "The <Link:%s> is overriding existing:\n%s"
+   , notEmptyLink: "The <Link:%s> is not empty"
+   , overrideLink: "The <Link:%s> is overriding existing"
    , missingLink: "The <Link> name is missing"
-   , missingTarget: "The <Target:%s> path doesn't exist:\n%s"
-   , newPathLink: "The <Link> directory path will be created:\n%s"
+   , missingTarget: "The <Target:%s> path doesn't exist"
+   , newPathLink: "The <Link> directory path will be created"
    , emptyLink: "The <Link> path is empty!"
    , emptyTarget: "The <Target> path is empty!"
-   , bbb: "bbb" }
-
+   , mkNoOutput: "MKLINK failed!`nTry to run this program with Administrator privileges"
+   , mkOutput: "MKLINK: %s"}
