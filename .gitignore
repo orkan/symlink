@@ -4,3 +4,4 @@
 *.gz
 *.rar
 *.lnk
+src/symlink.ini
