@@ -4,9 +4,9 @@
 #Include symlink.def.inc.ahk
 #Include symlink.lang.inc.ahk
 
-version := "v0.1.0"
+base_name := "symlink"
+version := "v0.2"
 
-base_name := RegExReplace(A_ScriptName, "(.+?)(\.[^.]*$|$)", "$1")
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
 ini  := merge_from_ini(ini,  name_ini)
