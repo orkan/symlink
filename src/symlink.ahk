@@ -15,10 +15,10 @@ lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
 lang := merge_from_ini(lang, lang_ini)
 
 Gui, Add, Text, x10 y15 w40 h20 vLAB_LNK, % lang.window.link . ":"
-Gui, Add, Edit, x52 y13 w490 h20 vEDIT_LNK gonChange_EDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
+Gui, Add, Edit, x52 y13 w490 h20 gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 
 Gui, Add, Text, x10 y45 w40 h20 vLAB_SRC, % lang.window.target . ":"
-Gui, Add, Edit, x52 y43 w490 h20 vEDIT_SRC gonChange_EDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
+Gui, Add, Edit, x52 y43 w490 h20 gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
 ; get command line args (Menu > View > Parameters (Shift+F8))
 if (A_Args[1])
 	GuiControl,, EDIT_LNK, % A_Args[1]
@@ -28,8 +28,8 @@ if (A_Args[2])
 Gui, Add, Text, x10 y72 w40 h20 , % lang.window.cmd . ":"
 Gui, Add, Edit, x52 y73 w520 h80 vEDIT_CMD ReadOnly 
 
-Gui, Add, Button, x552 y13 w20 h20 vBTN_LNK gonClick_BTN_LNK hwndBTN_LNK,
-Gui, Add, Button, x552 y43 w20 h20 vBTN_SRC gonClick_BTN_SRC hwndBTN_SRC,
+Gui, Add, Button, x552 y13 w20 h20 vBTN_LNK gonClick_BROWSE hwndBTN_LNK,
+Gui, Add, Button, x552 y43 w20 h20 vBTN_SRC gonClick_BROWSE hwndBTN_SRC,
 GuiButtonIcon(BTN_LNK, "imageres.dll", 4)
 GuiButtonIcon(BTN_SRC, "imageres.dll", 4)
 ; select last radio button
@@ -39,10 +39,10 @@ for key, val in ini.rad {
 }
 if (!chSum)
 	chRAD_DIR := 1 ; go with default
-Gui, Add, Radio, x52  y163  w40 h20 vRAD_FILE   gonClick_RAD_FILE  	Checked%chRAD_FILE%		, % lang.window.mkFile
-Gui, Add, Radio, x92  y163  w70 h20 vRAD_DIR    gonClick_RAD_DIR    Checked%chRAD_DIR%		, % lang.window.mkDir
-Gui, Add, Radio, x166 y163 w96  h20 vRAD_FILE_H gonClick_RAD_FILE_H	Checked%chRAD_FILE_H%	, % lang.window.mkFileH
-Gui, Add, Radio, x262 y163 w100 h20 vRAD_DIR_H  gonClick_RAD_DIR_H 	Checked%chRAD_DIR_H%	, % lang.window.mkDirH
+Gui, Add, Radio, x52  y163  w40 h20 gonClick_RAD vRAD_FILE   Checked%chRAD_FILE%	, % lang.window.mkFile
+Gui, Add, Radio, x92  y163  w70 h20 gonClick_RAD vRAD_DIR    Checked%chRAD_DIR%		, % lang.window.mkDir
+Gui, Add, Radio, x166 y163 w96  h20 gonClick_RAD vRAD_FILE_H Checked%chRAD_FILE_H%	, % lang.window.mkFileH
+Gui, Add, Radio, x262 y163 w100 h20 gonClick_RAD vRAD_DIR_H  Checked%chRAD_DIR_H%	, % lang.window.mkDirH
 
 Gui, Add, Button, x362 y163 w100 h30 vBTN_OK gonClick_BTN_OK, % lang.window.btnok
 Gui, Add, Button, Default x472 y163 w100 h30 gonClick_BTN_CLOSE, % lang.window.btnclose
@@ -96,10 +96,7 @@ GuiDropFiles(GuiHwnd, FileArray, CtrlHwnd, X, Y) {
 		GuiControl,, %A_GuiControl%, % FileArray[1]
 }
 
-onClick_RAD_FILE:
-onClick_RAD_DIR:
-onClick_RAD_FILE_H:
-onClick_RAD_DIR_H:
+onClick_RAD:
 is_filelink := A_GuiControl = "RAD_FILE" || A_GuiControl = "RAD_FILE_H"
 icon_browse := is_filelink ? 3 : 4
 GuiButtonIcon(BTN_LNK, "imageres.dll", icon_browse)
@@ -107,15 +104,13 @@ GuiButtonIcon(BTN_SRC, "imageres.dll", icon_browse)
 show_cmd()
 return
 
-onChange_EDIT_LNK: ; gonChange_EDIT_LNK
-onChange_EDIT_SRC: ; gonChange_EDIT_SRC
+onChange_EDIT: ; gonChange_EDIT_LNK
 show_cmd()
 return
 
 ;==============================================================================================
 ; Browse for a file or folder
-onClick_BTN_LNK:
-onClick_BTN_SRC:
+onClick_BROWSE:
 Gui, +OwnDialogs
 Gui, Submit, NoHide
 
