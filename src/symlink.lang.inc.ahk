@@ -25,7 +25,7 @@ lang.msg
    , notEmptyLink: "The <Link:%s> is not empty"
    , overrideLink: "The <Link:%s> is overriding existing"
    , missingLink: "The <Link> name is missing"
-   , missingTarget: "The <Target:%s> path doesn't exist"
+   , missingTarget: "The <Target:%s> doesn't exist"
    , newPathLink: "The <Link> directory path will be created"
    , emptyLink: "The <Link> path is empty!"
    , emptyTarget: "The <Target> path is empty!"
