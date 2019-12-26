@@ -57,13 +57,21 @@ Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
+Gui, +HwndhWndGui
 Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
 ; WinMove instead of Gui, Show size params because of incosistency of size values (borders, etc...)
 ; Gui > Show, w: -16px
 ; Gui > Show, h: -35px
 WinMove, A,, ini.pos.x, ini.pos.y, ini.pos.w, ini.pos.h
 WinSet, AlwaysOnTop, % ini.wnd.top, A
+
+hWndGui := Format("{:u}", hWndGui) ; convert from 0x (hex) to UInt (dec)
+
+; register even hook callback: on_activate_gui (EVENT_SYSTEM_FOREGROUND = 3)
+DllCall("SetWinEventHook", "UInt", 3, "UInt", 3, "Ptr", 0, "Ptr", RegisterCallback(Func("on_activate_gui")), "Int", 0, "Int", 0, "UInt", 0, "Ptr")
+
 return
+
 
 GuiClose:
 GuiEscape:
@@ -317,4 +325,12 @@ build_cmd() {
 	out.cmd.Push("MKLINK " . switch . " """ . new_lnk . """ """ . new_src . """")
 
 	return out
+}
+
+;===========================
+; Foreground window change callback
+on_activate_gui(_hWinEventHook, _event, _hWnd, _idObject, _idChild, _dwEventThread, _dwmsEventTime) {
+    global hWndGui
+    if (hWndGui = _hWnd)
+		show_cmd()
 }
