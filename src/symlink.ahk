@@ -111,8 +111,8 @@ _msg("Made by Orkan® <orkans@gmail.com> © 2019", "info")
 return
 
 ;===========================
-; Drop & Down explorer files onto editboxes
-; @TODO: Doesn't work in admin mode - LOL!
+; Drag & Drop explorer files onto editboxes (doesn't work in admin mode due to UAC)
+; https://superuser.com/questions/59051/drag-and-drop-file-into-application-under-run-as-administrator
 GuiDropFiles(GuiHwnd, FileArray, CtrlHwnd, X, Y) {
     if (A_GuiControl = "EDIT_LNK" or A_GuiControl = "EDIT_SRC")
         GuiControl,, %A_GuiControl%, % FileArray[1]
