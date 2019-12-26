@@ -15,12 +15,15 @@ lang.window
    , file: "file" 
    , dir: "dir" }
 lang.menu
-:= { alwaysontop: "&Always on top"
-   , swaplinktarget: "&Swap link <> target"}
+:= { alwaysOnTop: "&Always on top"
+   , swapLinkTarget: "&Swap link <> target"
+   , help: "&Help"
+   , about: "&About"}
 lang.msg
 := { error: "Error"
    , warning: "Warning"
    , info: "Info"
+   , help: "Help message...`nHelp message...`nHelp message..."
    , sameLinkTarget: "The <Link> and <Target> are the same!"
    , notEmptyLink: "The <Link:%s> is not empty"
    , overrideLink: "The <Link:%s> is overriding existing"

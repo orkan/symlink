@@ -51,6 +51,9 @@ Gui, Add, Button, Default x472 y163 w100 h30 gonClick_BTN_CLOSE, % lang.window.b
 
 Menu, menu_popup, Add, % lang.menu.alwaysOnTop, onClickMenu_alwaysOnTop
 Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
+Menu, menu_popup, Add, % lang.menu.help, onClickMenu_help
+Menu, menu_popup, Add
+Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
@@ -70,6 +73,12 @@ save_rad()
 WriteINI(ini, name_ini)
 ExitApp
 
+;===========================
+; onContextMenu:
+GuiContextMenu:
+Menu, menu_popup, Show
+return
+
 onClickMenu_alwaysOnTop:
 ini.wnd.top := ini.wnd.top ? 0 : 1
 WinSet, AlwaysOnTop, % ini.wnd.top, A
@@ -83,10 +92,14 @@ GuiControl,, EDIT_LNK , % EDIT_SRC
 GuiControl,, EDIT_SRC , % EDIT_LNK
 return
 
-;===========================
-; onContextMenu:
-GuiContextMenu:
-Menu, menu_popup, Show
+onClickMenu_help:
+Gui, +OwnDialogs
+_msg(printf(lang.msg.help), "info")
+return
+
+onClickMenu_about:
+Gui, +OwnDialogs
+_msg("Made by Orkan® <orkans@gmail.com> © 2019", "info")
 return
 
 ;===========================
