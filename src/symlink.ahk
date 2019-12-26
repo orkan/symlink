@@ -5,7 +5,7 @@
 #Include symlink.lang.inc.ahk
 
 base_name := "symlink"
-version := "v0.2"
+version := "v0.3"
 
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
@@ -152,30 +152,31 @@ return
 ;###################################################################################################
 ; OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK OK
 ;###################################################################################################
-
-; validate and run
-onClick_BTN_OK:
+onClick_BTN_OK: ; validate and run
 global EDIT_LNK, EDIT_SRC, EDIT_CMD
 Gui, +OwnDialogs
 Gui, Submit, NoHide
 
-result := build_cmd()
+arr := build_cmd()
 
-if (result.err.Length())
+; show errors first
+for k, v in arr.err
+	_msg(v.msg . (v.src ? ":`n" . v.src : ""), v.cap)
+
+if (!arr.err.Length())
 {
-	for k, v in result.err {
+	; show additional info before execution - if any
+	for k, v in arr.inf
 		_msg(v.msg . (v.src ? ":`n" . v.src : ""), v.cap)
-	}
-}
-else
-{
+	
 	if (FileExist(EDIT_LNK)) {
 		MsgBox, 305, Confirm Delete, Replace %EDIT_LNK%?
 		IfMsgBox Cancel
 			return
 	}
 	
-	output := RunWaitMany(implode(result.cmd, "`n"))
+	output := RunWaitMany(implode(arr.cmd, "`n"))
+	
 	if (output)
 		_msg(printf(lang.msg.mkOutput, output), "info")
 	else
@@ -187,35 +188,34 @@ return
 ; FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS FUNCTIONS 
 ;###################################################################################################
 show_cmd() {
-	result := build_cmd()
 	out := []
+	arr := build_cmd()
+
+	for k, v in array_merge(arr.inf, arr.err)
+		out.Push(A_Index . ". " . v.msg)
+
+	cColor := arr.err.Length() ? "+cRed" : (arr.inf.Length() ? "+cGreen" : "+cDefault")
+	apply_control("EDIT_CMD", cColor)
 	
-	if (result.err.Length()) {
-		apply_control("EDIT_CMD", "+cRed")
-		for k, v in result.err
-			out.Push(A_Index . ". " . v.msg)
-	}
-	else {
-		apply_control("EDIT_CMD", "+cDefault")
-		out := result.cmd
-	}
-	
+	out := array_merge(out, arr.cmd)
 	GuiControl,, EDIT_CMD , % implode(out, "`n")
 }
 ;===========================
 ; validate user input to output array:
 ; arr := []
 ; arr.err
-; := [{cap: "error",   msg: "A message", src: "D:\path\to\file1.txt"}
-;    ,{cap: "warning", msg: "A message"}
-;    ,{cap: "info",    msg: "A message", src: "D:\path\to\file2.txt"}]
+; := [{cap: "error",   msg: "An error message", src: "D:\path\to\file1.txt"}
+;    ,{cap: "error",   msg: "An error message"}]
+; arr.inf
+; := [{cap: "warning", msg: "A warning message"}
+;    ,{cap: "info",    msg: "A info message", src: "D:\path\to\file3.txt"}]
 ; arr.cmd
 ; := ["cmd1", "cmd2", "cmd3"]
 build_cmd() {
 	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, EDIT_LNK, EDIT_SRC, EDIT_CMD, lang
 	Gui, Submit, NoHide
 	
-	out := {err: [], cmd: []}
+	out := {err: [], inf: [], cmd: []}
 	new_lnk := EDIT_LNK
 	new_src := EDIT_SRC
 	
@@ -268,7 +268,7 @@ build_cmd() {
 				; create parent folder if not exists
 				if (parent_lnk && !path_exist(true, parent_lnk)) {
 					apply_control("LAB_LNK", "+cGreen")
-					out.err.Push({cap: "info", msg: printf(lang.msg.newPathLink, fs_type), src: new_lnk})
+					out.inf.Push({cap: "info", msg: printf(lang.msg.newPathLink, fs_type), src: new_lnk})
 					out.cmd.Push("MKDIR " . parent_lnk)
 				}
 			}

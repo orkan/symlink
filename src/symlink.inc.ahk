@@ -106,10 +106,19 @@ apply_control(el, set) {
 
 ;===========================
 ; Merge 2 objects recursively
+; same numeric and string keys gets overwriten
 object_merge(o1, o2) {
 	for, k, v in o2
 		o1[k] := IsObject(v) ? object_merge(o1[k], v) : v
 	return o1
+}
+
+;===========================
+; Merge 2 arrays
+; same numeric keys gets added at the end
+array_merge(a1, a2) {
+	a1.Push(a2*)
+	return a1
 }
 
 ;===========================
