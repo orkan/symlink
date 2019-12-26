@@ -11,59 +11,59 @@
 ;===========================
 ; save window position to ini
 save_pos() {
-	global ini
-	WinGetPos tmpX, tmpY, tmpW, tmpH, A
-	ini.pos
-	:= { x: tmpX
-	   , y: tmpY
-	   , w: tmpW ; Gui > Show: -16px
-	   , h: tmpH} ; Gui > Show: -35px
+    global ini
+    WinGetPos tmpX, tmpY, tmpW, tmpH, A
+    ini.pos
+    := { x: tmpX
+       , y: tmpY
+       , w: tmpW ; Gui > Show: -16px
+       , h: tmpH} ; Gui > Show: -35px
 }
 ;===========================
 ; save radiobutons state to ini
 save_rad() {
-	global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, ini
-	Gui, Submit, NoHide
+    global RAD_FILE, RAD_DIR, RAD_FILE_H, RAD_DIR_H, ini
+    Gui, Submit, NoHide
 
-	for key, val in ini.rad
-		ini.rad[key] := %key%
+    for key, val in ini.rad
+        ini.rad[key] := %key%
 }
 ;===========================
 ; remove dir
 cmd_remove(is_dir, path) {
-	return (is_dir ? "RD " : "DEL ") . path
+    return (is_dir ? "RD " : "DEL ") . path
 }
 
 ;===========================
 ; Visualize future errors
 _msg(str, type:=64) {
-	global lang
-	arr := {error: 16, warning: 48, info: 64}
-	MsgBox, % arr[type], % lang.msg[type], % str
+    global lang
+    arr := {error: 16, warning: 48, info: 64}
+    MsgBox, % arr[type], % lang.msg[type], % str
 }
 
 ;===========================
 ; Check if empty...
 check_isempty(is_dir, path) {
-	return is_dir ? dir_isempty(path) : file_isempty(path)
+    return is_dir ? dir_isempty(path) : file_isempty(path)
 }
 
 ;===========================
 ; Dir is empty?
 ; Return true only if dir is empty or is symlink
 dir_isempty(path) {
-	path := RTrim(path, "\")
-	Loop %path%\*.*, 0, 1
-		return path_issymlink(path)
-	return true
+    path := RTrim(path, "\")
+    Loop %path%\*.*, 0, 1
+        return path_issymlink(path)
+    return true
 }
 
 ;===========================
 ; File is empty?
 ; Return true only if file is empty or is symlink
 file_isempty(path) {
-	FileGetSize, isempty, % path
-	return isempty = 0 ? true : path_issymlink(path)
+    FileGetSize, isempty, % path
+    return isempty = 0 ? true : path_issymlink(path)
 }
 
 ;===========================
@@ -72,75 +72,75 @@ path_issymlink(path) {
 ;https://docs.microsoft.com/pl-pl/windows/win32/api/fileapi/nf-fileapi-getfileattributesa
 ;https://docs.microsoft.com/pl-pl/windows/win32/fileio/file-attribute-constants
 ;FILE_ATTRIBUTE_REPARSE_POINT : 1024 (0x400) -A file or directory that has an associated reparse point, or a file that is a symbolic link.
-	attr := DllCall("GetFileAttributes", "Str", path)
-	return attr & 1024 > 0
+    attr := DllCall("GetFileAttributes", "Str", path)
+    return attr & 1024 > 0
 }
 
 ;===========================
 ; File is readonly?
 file_isreadonly(path) {
-	return InStr(FileExist(path), "R")
+    return InStr(FileExist(path), "R")
 }
 
 ;===========================
 ; test if file/dir path exists
 path_exist(is_dir, path) {
-	attr := FileExist(path)
-	isdir := InStr(attr, "D")
-	return is_dir ? isdir : attr && !isdir
+    attr := FileExist(path)
+    isdir := InStr(attr, "D")
+    return is_dir ? isdir : attr && !isdir
 }
 
 ;===========================
 ; find root dir of this path string
 path_get_parent(path) {
-	SplitPath, path,, parent
-	return parent
+    SplitPath, path,, parent
+    return parent
 }
 
 ;===========================
 ; Functionize GuiControl command
 ; So, it can be parametrized eg. with ternary conditional operators
 apply_control(el, set) {
-	GuiControl %set% +Redraw, %el%
+    GuiControl %set% +Redraw, %el%
 }
 
 ;===========================
 ; Merge 2 objects recursively
 ; same numeric and string keys gets overwriten
 object_merge(o1, o2) {
-	for, k, v in o2
-		o1[k] := IsObject(v) ? object_merge(o1[k], v) : v
-	return o1
+    for, k, v in o2
+        o1[k] := IsObject(v) ? object_merge(o1[k], v) : v
+    return o1
 }
 
 ;===========================
 ; Merge 2 arrays
 ; same numeric keys gets added at the end
 array_merge(a1, a2) {
-	a1.Push(a2*)
-	return a1
+    a1.Push(a2*)
+    return a1
 }
 
 ;===========================
 ; Merge 2 objects recursively
 implode(arr, str) {
-	len := arr.Length()
-	if !len
-		return ""
-	
-	Loop % len - 1
-		s .= arr[A_Index] . str
-	
-	return s . arr[len]
+    len := arr.Length()
+    if !len
+        return ""
+    
+    Loop % len - 1
+        s .= arr[A_Index] . str
+    
+    return s . arr[len]
 }
 
 ;===========================
 ; Load user settings from ini file and merge it with given array
 merge_from_ini(obj, name) {
-	if (FileExist(name)) {
-		obj := object_merge(obj, ReadINI(name)) ; overwrites symlink.def.inc.ahk
-	}
-	return obj
+    if (FileExist(name)) {
+        obj := object_merge(obj, ReadINI(name)) ; overwrites symlink.def.inc.ahk
+    }
+    return obj
 }
 
 ;===========================
@@ -148,8 +148,8 @@ merge_from_ini(obj, name) {
 printf(msg, args*) {
     for each, s in args
         msg := StrReplace(msg, "%s", s,, 1)
-	
-	msg := StrReplace(msg, "\n", "`n")
+    
+    msg := StrReplace(msg, "\n", "`n")
     return msg
 }
 ;###################################################################################################
@@ -161,24 +161,24 @@ printf(msg, args*) {
 ; https://www.autohotkey.com/boards/viewtopic.php?t=1985
 GuiButtonIcon(Handle, File, Index := 1, Options := "")
 {
-	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
-	RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
-	RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
-	RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
-	RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
-	RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
-	RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
-	RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
-	Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
-	VarSetCapacity( button_il, 20 + Psz, 0 )
-	NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )	; Width & Height
-	NumPut( L, button_il, 0 + Psz, DW )		; Left Margin
-	NumPut( T, button_il, 4 + Psz, DW )		; Top Margin
-	NumPut( R, button_il, 8 + Psz, DW )		; Right Margin
-	NumPut( B, button_il, 12 + Psz, DW )	; Bottom Margin	
-	NumPut( A, button_il, 16 + Psz, DW )	; Alignment
-	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
-	return IL_Add( normal_il, File, Index )
+    RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
+    RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
+    RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
+    RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
+    RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
+    RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
+    RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
+    RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
+    Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+    VarSetCapacity( button_il, 20 + Psz, 0 )
+    NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr ) ; Width & Height
+    NumPut( L, button_il, 0 + Psz, DW )  ; Left Margin
+    NumPut( T, button_il, 4 + Psz, DW )  ; Top Margin
+    NumPut( R, button_il, 8 + Psz, DW )  ; Right Margin
+    NumPut( B, button_il, 12 + Psz, DW ) ; Bottom Margin    
+    NumPut( A, button_il, 16 + Psz, DW ) ; Alignment
+    SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+    return IL_Add( normal_il, File, Index )
 }
 
 ;###################################################################################################
