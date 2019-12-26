@@ -54,7 +54,6 @@ Gui, Add, Button, xp x+m w100 h30 Default gonClick_BTN_CLOSE, % lang.window.btnc
 
 Menu, menu_popup, Add, % lang.menu.alwaysOnTop, onClickMenu_alwaysOnTop
 Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
-Menu, menu_popup, Add, % lang.menu.help, onClickMenu_help
 Menu, menu_popup, Add
 Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
@@ -101,11 +100,6 @@ Gui, Submit, NoHide
 tmp := EDIT_LNK
 GuiControl,, EDIT_LNK , % EDIT_SRC
 GuiControl,, EDIT_SRC , % EDIT_LNK
-return
-
-onClickMenu_help:
-Gui, +OwnDialogs
-_msg(printf(lang.msg.help), "info")
 return
 
 onClickMenu_about:
