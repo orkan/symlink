@@ -14,24 +14,27 @@ ini  := merge_from_ini(ini,  name_ini)
 lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
 lang := merge_from_ini(lang, lang_ini)
 
-Gui, Add, Text, x10 y15 w40 h20 vLAB_LNK, % lang.window.link . ":"
-Gui, Add, Edit, x52 y13 w490 h20 gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
+Gui -MaximizeBox
+Gui, Margin , 10, 10
 
-Gui, Add, Text, x10 y45 w40 h20 vLAB_SRC, % lang.window.target . ":"
-Gui, Add, Edit, x52 y43 w490 h20 gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
+Gui, Add, Text, w40     vLAB_LNK, % lang.window.link . ":"
+Gui, Add, Text,         vLAB_SRC, % lang.window.target . ":"
+Gui, Add, Edit, ys w480 gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
+Gui, Add, Edit,    w480 gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
 ; get command line args (Menu > View > Parameters (Shift+F8))
 if (A_Args[1])
     GuiControl,, EDIT_LNK, % A_Args[1]
 if (A_Args[2])
     GuiControl,, EDIT_SRC, % A_Args[2]
 
-Gui, Add, Text, x10 y72 w40 h20 , % lang.window.cmd . ":"
-Gui, Add, Edit, x52 y73 w520 h80 vEDIT_CMD ReadOnly 
-
-Gui, Add, Button, x552 y13 w20 h20 vBTN_LNK gonClick_BROWSE hwndBTN_LNK,
-Gui, Add, Button, x552 y43 w20 h20 vBTN_SRC gonClick_BROWSE hwndBTN_SRC,
+Gui, Add, Button, ys w20 h20 vBTN_LNK gonClick_BROWSE hwndBTN_LNK,
+Gui, Add, Button,    w20 h20 vBTN_SRC gonClick_BROWSE hwndBTN_SRC,
 GuiButtonIcon(BTN_LNK, "imageres.dll", 4)
 GuiButtonIcon(BTN_SRC, "imageres.dll", 4)
+
+Gui, Add, Text, xs w40, % lang.window.cmd . ":"
+Gui, Add, Edit, xp x+m R6 w510 vEDIT_CMD ReadOnly 
+
 ; select last radio button
 for key, val in ini.rad {
     ch%key% := val ; Checked1 - selected, Checked0 - unselected
@@ -39,13 +42,13 @@ for key, val in ini.rad {
 }
 if (!chSum)
     chRAD_DIR := 1 ; go with default
-Gui, Add, Radio, x52  y163  w40 h20 gonClick_RAD vRAD_FILE   Checked%chRAD_FILE%  , % lang.window.mkFile
-Gui, Add, Radio, x92  y163  w70 h20 gonClick_RAD vRAD_DIR    Checked%chRAD_DIR%   , % lang.window.mkDir
-Gui, Add, Radio, x166 y163 w96  h20 gonClick_RAD vRAD_FILE_H Checked%chRAD_FILE_H%, % lang.window.mkFileH
-Gui, Add, Radio, x262 y163 w100 h20 gonClick_RAD vRAD_DIR_H  Checked%chRAD_DIR_H% , % lang.window.mkDirH
+Gui, Add, Radio, xp y+m gonClick_RAD vRAD_FILE   Checked%chRAD_FILE%  , % lang.window.mkFile
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR    Checked%chRAD_DIR%   , % lang.window.mkDir
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_FILE_H Checked%chRAD_FILE_H%, % lang.window.mkFileH
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR_H  Checked%chRAD_DIR_H% , % lang.window.mkDirH
 
-Gui, Add, Button, x362 y163 w100 h30 vBTN_OK gonClick_BTN_OK, % lang.window.btnok
-Gui, Add, Button, Default x472 y163 w100 h30 gonClick_BTN_CLOSE, % lang.window.btnclose
+Gui, Add, Button, xp x+m w100 h30 vBTN_OK gonClick_BTN_OK, % lang.window.btnok
+Gui, Add, Button, xp x+m w100 h30 Default gonClick_BTN_CLOSE, % lang.window.btnclose
 
 ;Gui, Add, Picture, x10 y121 w32 h32, ..\res\shell32.dll,16769.ico ; only linked!
 
@@ -62,7 +65,7 @@ Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAd
 ; WinMove instead of Gui, Show size params because of incosistency of size values (borders, etc...)
 ; Gui > Show, w: -16px
 ; Gui > Show, h: -35px
-WinMove, A,, ini.pos.x, ini.pos.y, ini.pos.w, ini.pos.h
+WinMove, A,, ini.pos.x, ini.pos.y
 WinSet, AlwaysOnTop, % ini.wnd.top, A
 
 hWndGui := Format("{:u}", hWndGui) ; convert from 0x (hex) to UInt (dec)
