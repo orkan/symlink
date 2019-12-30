@@ -146,7 +146,7 @@ return
 
 onClickMenu_about:
 Gui, +OwnDialogs
-_msg("Made by Orkan® <orkans@gmail.com> © 2019", "info")
+_msg("Graphical GUI for MKLINK command line tool`nMade by Orkan® <orkans@gmail.com> © 2019", "info")
 return
 
 ;===========================
