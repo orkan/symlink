@@ -1,5 +1,6 @@
 ﻿#NoTrayIcon
 #SingleInstance,force
+#Include ..\..\_ahk\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
 #Include symlink.def.inc.ahk
 #Include symlink.lang.inc.ahk
@@ -78,7 +79,7 @@ return
 GuiClose:
 GuiEscape:
 onClick_BTN_CLOSE:
-save_pos()
+save_pos_gui()
 save_rad()
 WriteINI(ini, name_ini)
 ExitApp
