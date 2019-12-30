@@ -1,3 +1,20 @@
+;WinGetTitle, guiTitle, A
+;WinSetTitle, ahk_id %hWndGui%,, % "hWndBtnOk: " hWndBtnOk ", guiW: " guiW ", addW: " addW
+
+;===========================
+; save window position to ini
+save_pos() {
+    global ini, guiW
+    
+    WinGet, isMinMax, MinMax, A
+    ini.wnd.max := isMinMax
+    
+    if(!isMinMax) {
+        WinGetPos tmpX, tmpY, , , A
+        ini.pos := { x: tmpX, y: tmpY, w: guiW}
+    }
+}
+
 ;===========================
 ; save radiobutons state to ini
 save_rad() {

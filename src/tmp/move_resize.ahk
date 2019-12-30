@@ -5,7 +5,7 @@
 _edW := 400
 
 ;Gui, TreeBox: New,, TreeBox
-Gui, +Resize +MinSize +HwndhWndGui
+Gui, +Resize +MinSize ;+HwndhWndGui
 
 Gui, Add, Text, w40       vLAB_LNK, test1:
 Gui, Add, Text,           vLAB_SRC, test2:
@@ -17,7 +17,7 @@ Gui, Add, Radio, xp x+m, test2
 Gui, Add, Radio, xp x+m, test3
 Gui, Add, Radio, xp x+m, test4
 
-Gui, Add, Button, xp x+m w100 h30 hwndhWnd_BTN_OK vBTN_OK , OK
+Gui, Add, Button, xp x+m w100 h30 hwndhWnd_BTN_OK vBTN_OK gonClick_BTN_OK, OK
 Gui, Add, Button, xp x+m w100 h30 hwndhWnd_BTN_CL vBTN_CL Default , Close
 
 Gui, Show,, Symlink Creator v0
@@ -44,6 +44,15 @@ GuiControl, movedraw, BTN_OK, % "x" offX + _btnOkX ; auto redraw
 GuiControl, movedraw, BTN_CL, % "x" offX + _btnClX ; auto redraw
 return
 
+onClick_BTN_OK:
+Loop , 10 {
+	Sleep 500
+	WinGetPos tmpX, tmpY, tmpW, tmpH, A
+	GuiControl,, EDIT_LNK , % "tmpX: " tmpX ", tmpY: " tmpY ", tmpW: " tmpW ", tmpH: " tmpH ", A_Index: " A_Index
+	
+	WinMove, A,, tmpX, tmpY, tmpW, tmpH
+}
+return
 
 GuiClose:
 GuiEscape:

@@ -1,5 +1,6 @@
 ﻿#NoTrayIcon
 #SingleInstance,force
+;SetWinDelay, 100
 #Include ..\..\_ahk\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
 #Include symlink.def.inc.ahk
@@ -15,41 +16,38 @@ ini  := merge_from_ini(ini,  name_ini)
 lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
 lang := merge_from_ini(lang, lang_ini)
 
-Gui -MaximizeBox
-Gui, Margin , 10, 10
+edW := 478 ; initial edit width
+ecW := 510 ; initial cmd width
+lbW :=  40 ; labels width
 
-Gui, Add, Text, w40     vLAB_LNK, % lang.window.link . ":"
-Gui, Add, Text,         vLAB_SRC, % lang.window.target . ":"
-Gui, Add, Edit, ys w480 gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
-Gui, Add, Edit,    w480 gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
+Gui, Add, Text, w%lbW%    vLAB_LNK, % lang.window.link . ":"
+Gui, Add, Text,           vLAB_SRC, % lang.window.target . ":"
+Gui, Add, Edit, ys w%edW% gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
+Gui, Add, Edit,    w%edW% gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
 ; get command line args (Menu > View > Parameters (Shift+F8))
 if (A_Args[1])
     GuiControl,, EDIT_LNK, % A_Args[1]
 if (A_Args[2])
     GuiControl,, EDIT_SRC, % A_Args[2]
 
-Gui, Add, Button, ys w20 h20 vBTN_LNK gonClick_BROWSE hwndBTN_LNK,
-Gui, Add, Button,    w20 h20 vBTN_SRC gonClick_BROWSE hwndBTN_SRC,
-GuiButtonIcon(BTN_LNK, "imageres.dll", 4)
-GuiButtonIcon(BTN_SRC, "imageres.dll", 4)
+Gui, Add, Button, ys w22 h22 vBTN_LNK hwndhWndBtnLnk gonClick_BROWSE ; vBTN_LNK - for GuiControl, and hWnd for ControlGetPos - ROTFL!
+Gui, Add, Button,    w22 h22 vBTN_SRC hwndhWndBtnSrc gonClick_BROWSE ; vBTN_SRC
 
-Gui, Add, Text, xs w40, % lang.window.cmd . ":"
-Gui, Add, Edit, xp x+m R6 w510 vEDIT_CMD ReadOnly 
+Gui, Add, Text, xs w%lbW%, % lang.window.cmd . ":"
+Gui, Add, Edit, xp x+m R6 w%ecW% vEDIT_CMD ReadOnly 
 
 ; select last radio button
 for key, val in ini.rad {
-    ch%key% := val ; Checked1 - selected, Checked0 - unselected
-    chSum += val
+    %key% := val
+    radCurrent := val ? key : radCurrent
 }
-if (!chSum)
-    chRAD_DIR := 1 ; go with default
-Gui, Add, Radio, xp y+m gonClick_RAD vRAD_FILE   Checked%chRAD_FILE%  , % lang.window.mkFile
-Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR    Checked%chRAD_DIR%   , % lang.window.mkDir
-Gui, Add, Radio, xp x+m gonClick_RAD vRAD_FILE_H Checked%chRAD_FILE_H%, % lang.window.mkFileH
-Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR_H  Checked%chRAD_DIR_H% , % lang.window.mkDirH
+Gui, Add, Radio, xp y+m gonClick_RAD vRAD_FILE   Checked%RAD_FILE%  , % lang.window.mkFile ; Checked1 - selected, Checked0 - unselected
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR    Checked%RAD_DIR%   , % lang.window.mkDir
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_FILE_H Checked%RAD_FILE_H%, % lang.window.mkFileH
+Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR_H  Checked%RAD_DIR_H% , % lang.window.mkDirH
 
-Gui, Add, Button, xp x+m w100 h30 vBTN_OK gonClick_BTN_OK, % lang.window.btnok
-Gui, Add, Button, xp x+m w100 h30 Default gonClick_BTN_CLOSE, % lang.window.btnclose
+Gui, Add, Button, xp x+m w100 h30 vBTN_OK hwndhWndBtnOk gonClick_BTN_OK        , % lang.window.btnok
+Gui, Add, Button, xp x+m w100 h30 vBTN_CL hwndhWndBtnCl gonClick_BTN_CL Default, % lang.window.btnclose
 
 ;Gui, Add, Picture, x10 y121 w32 h32, ..\res\shell32.dll,16769.ico ; only linked!
 
@@ -60,26 +58,69 @@ Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
-Gui, +HwndhWndGui
+; GUI Show!
+Gui, % "+Resize +MinSize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
 Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
-; WinMove instead of Gui, Show size params because of incosistency of size values (borders, etc...)
-; Gui > Show, w: -16px
-; Gui > Show, h: -35px
-WinMove, A,, ini.pos.x, ini.pos.y
-WinSet, AlwaysOnTop, % ini.wnd.top, A
 
-hWndGui := Format("{:u}", hWndGui) ; convert from 0x (hex) to UInt (dec)
+ ; convert from 0x (hex) to UInt (dec)
+hWndGuiDec := Format("{:u}", hWndGui)
+
+ ; get initial button positions
+ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
+ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
+ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
+ControlGetPos, BtnSrcX,,,,, ahk_id %hWndBtnSrc%
+btnOkX -= 8
+btnClX -= 8
+BtnLnkX -= 8
+BtnSrcX -= 8
 
 ; register even hook callback: on_activate_gui (EVENT_SYSTEM_FOREGROUND = 3)
 DllCall("SetWinEventHook", "UInt", 3, "UInt", 3, "Ptr", 0, "Ptr", RegisterCallback(Func("on_activate_gui")), "Int", 0, "Int", 0, "UInt", 0, "Ptr")
-
+update_icon_browse(radCurrent)
 return
 
+GuiSize:
+guiW := A_GuiWidth ; remember last resize to save in INI on exit
+
+if (!initGuiW) {
+	initGuiW := A_GuiWidth ; 581
+    guiW := ini.pos.w ? ini.pos.w : A_GuiWidth
+
+    ; set initial gui size here - not in Gui, Show because of remembering +MinSize
+    WinMove, ahk_id %hWndGui%,, ini.pos.x, ini.pos.y, guiW + 16
+	Gui, % "+MaxSizex" A_GuiHeight ; block Gui height
+    
+    ; is Maximized?
+    initMinMax := ini.wnd.max
+}
+offset := guiW - initGuiW
+GuiControl, movedraw, EDIT_LNK, % "w" offset + edW
+GuiControl, movedraw, EDIT_SRC, % "w" offset + edW ; 478 ; initial edit width
+GuiControl, movedraw, EDIT_CMD, % "w" offset + ecW ; 510 ; initial cmd width
+GuiControl, movedraw, BTN_OK  , % "x" offset + btnOkX ; movedraw - auto redraw otherwise afterfacts
+GuiControl, movedraw, BTN_CL  , % "x" offset + btnClX
+GuiControl, movedraw, BTN_LNK , % "x" offset + BtnLnkX
+GuiControl, movedraw, BTN_SRC , % "x" offset + BtnSrcX
+
+if (initMinMax) {
+    if (initMinMax = -1) {
+        WinMinimize, ahk_id %hWndGui%
+        initMinMax := 0
+    }
+    ;~ else {
+        ;~ WinMaximize, ahk_id %hWndGui% ; +redraw !!!
+        ;~ ;WinSet, Redraw, , ahk_id %hWndGui%
+        ;~ ;goto GuiSize
+        ;~ ;Gui, Show
+    ;~ }
+}
+return
 
 GuiClose:
 GuiEscape:
-onClick_BTN_CLOSE:
-save_pos_gui()
+onClick_BTN_CL:
+save_pos()
 save_rad()
 WriteINI(ini, name_ini)
 ExitApp
@@ -116,11 +157,17 @@ GuiDropFiles(GuiHwnd, FileArray, CtrlHwnd, X, Y) {
         GuiControl,, %A_GuiControl%, % FileArray[1]
 }
 
+update_icon_browse(rad) {
+    global hWndBtnLnk, hWndBtnSrc
+;MsgBox % "rad: " rad
+    is_filelink := rad = "RAD_FILE" || rad = "RAD_FILE_H"
+    icon_browse := is_filelink ? 3 : 4
+    GuiButtonIcon(hWndBtnLnk, "imageres.dll", icon_browse)
+    GuiButtonIcon(hWndBtnSrc, "imageres.dll", icon_browse)
+}
+
 onClick_RAD:
-is_filelink := A_GuiControl = "RAD_FILE" || A_GuiControl = "RAD_FILE_H"
-icon_browse := is_filelink ? 3 : 4
-GuiButtonIcon(BTN_LNK, "imageres.dll", icon_browse)
-GuiButtonIcon(BTN_SRC, "imageres.dll", icon_browse)
+update_icon_browse(A_GuiControl)
 show_cmd()
 return
 
@@ -329,7 +376,7 @@ build_cmd() {
 ;===========================
 ; Foreground window change callback
 on_activate_gui(_hWinEventHook, _event, _hWnd, _idObject, _idChild, _dwEventThread, _dwmsEventTime) {
-    global hWndGui
-    if (hWndGui = _hWnd)
+    global hWndGuiDec
+    if (_hWnd = hWndGuiDec)
         show_cmd()
 }
