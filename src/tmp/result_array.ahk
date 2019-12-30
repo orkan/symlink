@@ -1,6 +1,6 @@
 #NoTrayIcon
 #SingleInstance, Force
-#Include D:\Orkan\Code\Exe\AutoHotkey\Symlink\lib\wolf_II - CustomBoxes.2018\TreeBox.ahk
+#Include D:\Orkan\Code\Exe\AutoHotkey\_ahk\lib\CustomBoxes\TreeBox.ahk
 #Include ..\symlink.lang.inc.ahk
 
 _msg(type, str) {

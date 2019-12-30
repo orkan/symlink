@@ -31,7 +31,7 @@ save_rad() {
 ;===========================
 ; remove dir
 cmd_remove(is_dir, path) {
-    return (is_dir ? "RD " : "DEL ") . path
+    return (is_dir ? "RD " : "DEL ") . """" . path . """"
 }
 
 ;===========================
@@ -122,7 +122,7 @@ array_merge(a1, a2) {
 }
 
 ;===========================
-; Merge 2 objects recursively
+; Join array elements to a string
 implode(arr, str) {
     len := arr.Length()
     if !len
