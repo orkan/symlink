@@ -3,11 +3,12 @@
 SetWinDelay, 100
 #Include ..\..\_ahk\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
+#Include symlink.ver.ahk
 #Include symlink.def.inc.ahk
 #Include symlink.lang.inc.ahk
 
 base_name := "symlink"
-version := "v0.3"
+version := RegExReplace(git_version, "^v(\d)\.(\d).(\d)", "v$1.$2")
 
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
@@ -146,7 +147,7 @@ return
 
 onClickMenu_about:
 Gui, +OwnDialogs
-_msg("AutoHotkey GUI for MKLINK command line tool`nMade by Orkan <orkans@gmail.com> © 2019", "info")
+MsgBox, 64, % Format("{:T} {:s} (rev: {:s})", base_name, git_version, git_revision), % "AutoHotkey GUI for MKLINK command line tool`nMade by Orkan <orkans@gmail.com> © 2019"
 return
 
 ;===========================

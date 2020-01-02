@@ -1,8 +1,9 @@
-/etc/
-/bin/
-/test/
 /.settings/
+/bin/
+/etc/
+/test/
 *.gz
 *.rar
 *.lnk
 src/symlink.ini
+src/symlink.ver.ahk
