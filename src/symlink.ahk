@@ -1,6 +1,6 @@
 ﻿#NoTrayIcon
 #SingleInstance,force
-;SetWinDelay, 100
+SetWinDelay, 100
 #Include ..\..\_ahk\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
 #Include symlink.def.inc.ahk
@@ -62,10 +62,10 @@ show_cmd()
 Gui, % "+Resize +MinSize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
 Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
 
- ; convert from 0x (hex) to UInt (dec)
+; convert from 0x (hex) to UInt (dec)
 hWndGuiDec := Format("{:u}", hWndGui)
 
- ; get initial button positions
+; get initial button positions
 ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
 ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
 ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
@@ -146,7 +146,7 @@ return
 
 onClickMenu_about:
 Gui, +OwnDialogs
-_msg("Graphical GUI for MKLINK command line tool`nMade by Orkan® <orkans@gmail.com> © 2019", "info")
+_msg("AutoHotkey GUI for MKLINK command line tool`nMade by Orkan <orkans@gmail.com> © 2019", "info")
 return
 
 ;===========================
