@@ -66,11 +66,21 @@ Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAd
 ; convert from 0x (hex) to UInt (dec)
 hWndGuiDec := Format("{:u}", hWndGui)
 
+; Wait for Gui, Show
+gui_wait := 0
+Loop, 10 {
+    ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
+    ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
+    ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
+    ControlGetPos, BtnSrcX,,,,, ahk_id %hWndBtnSrc%
+    if (!btnOkX) {
+        Sleep 100
+        gui_wait++
+    }
+    else
+        break
+}
 ; get initial button positions
-ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
-ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
-ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
-ControlGetPos, BtnSrcX,,,,, ahk_id %hWndBtnSrc%
 btnOkX -= 8
 btnClX -= 8
 BtnLnkX -= 8
@@ -96,6 +106,12 @@ if (!initGuiW) {
     initMinMax := ini.wnd.max
 }
 offset := guiW - initGuiW
+
+;debug
+WinSetTitle, A,, % "[GuiSize:] guiW: " guiW ", initGuiW: " initGuiW ", btnOkX: " btnOkX ", BtnLnkX: " BtnLnkX ", gui_wait: " gui_wait
+;~ if (offset < 0)
+    ;~ MsgBox % "guiW: " guiW ", initGuiW: " initGuiW
+
 GuiControl, movedraw, EDIT_LNK, % "w" offset + edW
 GuiControl, movedraw, EDIT_SRC, % "w" offset + edW ; 478 ; initial edit width
 GuiControl, movedraw, EDIT_CMD, % "w" offset + ecW ; 510 ; initial cmd width
