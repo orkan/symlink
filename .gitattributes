@@ -1,0 +1,7 @@
+# core.autocrlf
+# Git can handle this by auto-converting CRLF line endings into LF when you add a file to the index, and vice versa when it checks out code onto your filesystem. You can turn on this functionality with the core.autocrlf setting. If you’re on a Windows machine, set it to true?—?this converts LF endings into CRLF when you check out code:
+# https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_code_core_autocrlf_code
+
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=crlf
