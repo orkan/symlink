@@ -7,7 +7,7 @@
 #Include symlink.lang.inc.ahk
 
 base_name := "symlink"
-version := RegExReplace(git_version, "^v(\d)\.(\d).(\d)", "v$1.$2")
+version := RegExReplace(git_version, "(v[0-9]+)(\.[0-9]+)(\.[0-9]+)(-.+)?", "$1$2$4") ; only: major.minor(-RC...)
 
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
