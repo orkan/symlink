@@ -57,8 +57,8 @@ Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
 ; GUI Show!
-Gui, % "-Resize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
-Gui, Show, % (ini.pos.x ? "x" ini.pos.x : "") (ini.pos.y ? "y" ini.pos.y : ""), % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
+Gui, % "+Resize +MinSize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
+Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
 
 ; convert from 0x (hex) to UInt (dec)
 hWndGuiDec := Format("{:u}", hWndGui)
@@ -69,9 +69,49 @@ update_icon_browse(radCurrent)
 return
 
 ; Restore last GUI size & pos
-; Cant always get proper initial positions of gui controls - AKH bug (last version rev. 6f27be9)
-;~ GuiSize:
-;~ return
+GuiSize:
+guiW := A_GuiWidth ; remember last resize to save in INI on exit
+
+if (!initGuiW) {
+	initGuiW := A_GuiWidth ; 581
+    guiW := ini.pos.w ? ini.pos.w : A_GuiWidth
+
+    ; get initial button positions
+    ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
+    ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
+    ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
+    ControlGetPos, BtnSrcX,,,,, ahk_id %hWndBtnSrc%
+    btnOkX -= 8
+    btnClX -= 8
+    BtnLnkX -= 8
+    BtnSrcX -= 8
+
+    ; set initial gui size here - not in Gui, Show because of remembering +MinSize
+    WinMove, ahk_id %hWndGui%,, ini.pos.x, ini.pos.y, guiW + 16
+	Gui, % "+MaxSizex" A_GuiHeight ; block Gui height
+    
+    ; is Maximized?
+    if (ini.wnd.max = -1) {
+        WinMinimize, ahk_id %hWndGui%
+        initMinMax := 0
+    }
+    ;~ else {
+        ;~ WinMaximize, ahk_id %hWndGui% ; +redraw !!!
+        ;~ ;WinSet, Redraw, , ahk_id %hWndGui%
+        ;~ ;goto GuiSize
+        ;~ ;Gui, Show
+    ;~ }
+}
+    
+offset := guiW - initGuiW
+GuiControl, movedraw, EDIT_LNK, % "w" offset + edW
+GuiControl, movedraw, EDIT_SRC, % "w" offset + edW ; 478 ; initial edit width
+GuiControl, movedraw, EDIT_CMD, % "w" offset + ecW ; 510 ; initial cmd width
+GuiControl, movedraw, BTN_OK  , % "x" offset + btnOkX ; movedraw - auto redraw otherwise afterfacts
+GuiControl, movedraw, BTN_CL  , % "x" offset + btnClX
+GuiControl, movedraw, BTN_LNK , % "x" offset + BtnLnkX
+GuiControl, movedraw, BTN_SRC , % "x" offset + BtnSrcX
+return
 
 GuiClose:
 GuiEscape:
