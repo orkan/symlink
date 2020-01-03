@@ -1,6 +1,5 @@
-﻿#NoTrayIcon
-#SingleInstance,force
-SetWinDelay, 100
+#NoTrayIcon
+#SingleInstance force
 #Include ..\..\_ahk\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
 #Include symlink.ver.ahk
@@ -50,8 +49,6 @@ Gui, Add, Radio, xp x+m gonClick_RAD vRAD_DIR_H  Checked%RAD_DIR_H% , % lang.win
 Gui, Add, Button, xp x+m w100 h30 vBTN_OK hwndhWndBtnOk gonClick_BTN_OK        , % lang.window.btnok
 Gui, Add, Button, xp x+m w100 h30 vBTN_CL hwndhWndBtnCl gonClick_BTN_CL Default, % lang.window.btnclose
 
-;Gui, Add, Picture, x10 y121 w32 h32, ..\res\shell32.dll,16769.ico ; only linked!
-
 Menu, menu_popup, Add, % lang.menu.alwaysOnTop, onClickMenu_alwaysOnTop
 Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
 Menu, menu_popup, Add
@@ -60,63 +57,21 @@ Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
 ; GUI Show!
-Gui, % "+Resize +MinSize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
-Gui, Show,, % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
+Gui, % "-Resize +HwndhWndGui " (ini.wnd.top ? "+AlwaysOnTop" : "")
+Gui, Show, % (ini.pos.x ? "x" ini.pos.x : "") (ini.pos.y ? "y" ini.pos.y : ""), % "Symlink Creator " version " (" lang.window.adminmode ": " (A_IsAdmin ? lang.window.yes : lang.window.no) ")"
 
 ; convert from 0x (hex) to UInt (dec)
 hWndGuiDec := Format("{:u}", hWndGui)
-
-; get initial button positions
-ControlGetPos, btnOkX,,,,, ahk_id %hWndBtnOk%
-ControlGetPos, btnClX,,,,, ahk_id %hWndBtnCl%
-ControlGetPos, BtnLnkX,,,,, ahk_id %hWndBtnLnk% 
-ControlGetPos, BtnSrcX,,,,, ahk_id %hWndBtnSrc%
-btnOkX -= 8
-btnClX -= 8
-BtnLnkX -= 8
-BtnSrcX -= 8
 
 ; register even hook callback: on_activate_gui (EVENT_SYSTEM_FOREGROUND = 3)
 DllCall("SetWinEventHook", "UInt", 3, "UInt", 3, "Ptr", 0, "Ptr", RegisterCallback(Func("on_activate_gui")), "Int", 0, "Int", 0, "UInt", 0, "Ptr")
 update_icon_browse(radCurrent)
 return
 
-GuiSize:
-guiW := A_GuiWidth ; remember last resize to save in INI on exit
-
-if (!initGuiW) {
-	initGuiW := A_GuiWidth ; 581
-    guiW := ini.pos.w ? ini.pos.w : A_GuiWidth
-
-    ; set initial gui size here - not in Gui, Show because of remembering +MinSize
-    WinMove, ahk_id %hWndGui%,, ini.pos.x, ini.pos.y, guiW + 16
-	Gui, % "+MaxSizex" A_GuiHeight ; block Gui height
-    
-    ; is Maximized?
-    initMinMax := ini.wnd.max
-}
-offset := guiW - initGuiW
-GuiControl, movedraw, EDIT_LNK, % "w" offset + edW
-GuiControl, movedraw, EDIT_SRC, % "w" offset + edW ; 478 ; initial edit width
-GuiControl, movedraw, EDIT_CMD, % "w" offset + ecW ; 510 ; initial cmd width
-GuiControl, movedraw, BTN_OK  , % "x" offset + btnOkX ; movedraw - auto redraw otherwise afterfacts
-GuiControl, movedraw, BTN_CL  , % "x" offset + btnClX
-GuiControl, movedraw, BTN_LNK , % "x" offset + BtnLnkX
-GuiControl, movedraw, BTN_SRC , % "x" offset + BtnSrcX
-
-if (initMinMax) {
-    if (initMinMax = -1) {
-        WinMinimize, ahk_id %hWndGui%
-        initMinMax := 0
-    }
-    ;~ else {
-        ;~ WinMaximize, ahk_id %hWndGui% ; +redraw !!!
-        ;~ ;WinSet, Redraw, , ahk_id %hWndGui%
-        ;~ ;goto GuiSize
-        ;~ ;Gui, Show
-    ;~ }
-}
-return
+; Restore last GUI size & pos
+; Cant always get proper initial positions of gui controls - AKH bug (last version rev. 6f27be9)
+;~ GuiSize:
+;~ return
 
 GuiClose:
 GuiEscape:
@@ -147,7 +102,7 @@ return
 
 onClickMenu_about:
 Gui, +OwnDialogs
-MsgBox, 64, % Format("{:T} {:s} (rev: {:s})", base_name, git_version, git_revision), % "AutoHotkey GUI for MKLINK command line tool`nMade by Orkan <orkans@gmail.com> © 2019"
+MsgBox, 64, % Format("{:T} {:s} (rev. {:s})", base_name, git_version, git_revision), % "AutoHotkey GUI for MKLINK command line tool`n2019 � Orkan <orkans@gmail.com> "
 return
 
 ;===========================
@@ -160,7 +115,6 @@ GuiDropFiles(GuiHwnd, FileArray, CtrlHwnd, X, Y) {
 
 update_icon_browse(rad) {
     global hWndBtnLnk, hWndBtnSrc
-;MsgBox % "rad: " rad
     is_filelink := rad = "RAD_FILE" || rad = "RAD_FILE_H"
     icon_browse := is_filelink ? 3 : 4
     GuiButtonIcon(hWndBtnLnk, "imageres.dll", icon_browse)

@@ -4,15 +4,9 @@
 ;===========================
 ; save window position to ini
 save_pos() {
-    global ini, guiW
-    
-    WinGet, isMinMax, MinMax, A
-    ini.wnd.max := isMinMax
-    
-    if(!isMinMax) {
-        WinGetPos tmpX, tmpY, , , A
-        ini.pos := { x: tmpX, y: tmpY, w: guiW}
-    }
+    global ini
+    WinGetPos tmpX, tmpY,,, A
+    ini.pos := { x: tmpX, y: tmpY}
 }
 
 ;===========================

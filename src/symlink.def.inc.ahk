@@ -2,11 +2,9 @@
 ini := []
 ini.pos
 := { x: ""
-   , y: ""
-   , w: ""}
+   , y: ""}
 ini.wnd
 := { top: 0
-   , max: 0
    , lang: "en"}
 ini.rad
 := { RAD_FILE:   0
