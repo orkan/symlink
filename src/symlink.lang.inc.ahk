@@ -17,6 +17,7 @@ lang.window
 lang.menu
 := { alwaysOnTop: "&Always on top"
    , swapLinkTarget: "&Swap link <> target"
+   , home: "Goto Homepage"
    , help: "&Help"
    , about: "&About"}
 lang.msg

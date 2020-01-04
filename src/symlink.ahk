@@ -7,6 +7,7 @@
 #Include symlink.lang.inc.ahk
 
 base_name := "symlink"
+base_url := "https://github.com/orkan/symlink"
 version := RegExReplace(git_version, "(v[0-9]+)(\.[0-9]+)(\.[0-9]+)(-.+)?", "$1$2$4") ; only: major.minor(-RC...)
 
 ; user settings - overwrites symlink.def.inc.ahk
@@ -54,6 +55,7 @@ Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
 Menu, menu_popup, Add, % lang.menu.help, onClickMenu_help
 Menu, menu_popup, Add
 Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
+Menu, menu_popup, Add, % lang.menu.home, onClickMenu_home
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
 show_cmd()
 
@@ -141,12 +143,16 @@ return
 
 onClickMenu_about:
 Gui, +OwnDialogs
-MsgBox, 64, % Format("{:T} {:s} (rev. {:s})", base_name, git_version, git_revision), % "AutoHotkey GUI for MKLINK command line tool`n2019 © Orkan <orkans@gmail.com>"
+MsgBox, 64, % Format("{:T} {:s} (rev. {:s})", base_name, git_version, git_revision), % "AutoHotkey GUI for MKLINK command line tool`n2019 © Orkan <orkans@gmail.com>`n`n" base_url
 return
 
 onClickMenu_help:
 Gui, +OwnDialogs
 _msg(printf(lang.msg.usage))
+return
+
+onClickMenu_home:
+Run, % base_url
 return
 
 ;===========================
