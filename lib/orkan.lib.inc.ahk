@@ -48,6 +48,7 @@ implode(arr, str) {
 ;===========================
 ; pseudo sprintf
 ; @TODO: Use Format() instead
+; Tip: DllCall( "msvcrt\sprintf", Str,HexClr, Str,"%06X", UInt,RGB )
 printf(msg, args*) {
     for each, s in args
         msg := StrReplace(msg, "%s", s,, 1)
