@@ -1,6 +1,6 @@
 #NoTrayIcon
 #SingleInstance force
-#Include ..\..\_ahk\lib\orkan.lib.ahk
+#Include ..\lib\orkan.lib.ahk
 #Include symlink.inc.ahk
 #Include symlink.ver.ahk
 #Include symlink.def.inc.ahk
@@ -20,7 +20,7 @@ edW := 478 ; initial edit width
 ecW := 510 ; initial cmd width
 lbW :=  40 ; labels width
 
-Gui, Add, Text, w%lbW%    vLAB_LNK, % lang.window.link . ":"
+Gui, Add, Text,    w%lbW% vLAB_LNK, % lang.window.link . ":"
 Gui, Add, Text,           vLAB_SRC, % lang.window.target . ":"
 Gui, Add, Edit, ys w%edW% gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 Gui, Add, Edit,    w%edW% gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt

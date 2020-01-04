@@ -3,7 +3,7 @@
 The AutoHotkey GUI for MKLINK command line tool
 
 ![Gui RD MKLINK](res/gui_v0.3.8-RC2_rd_mklink.png)
-![Gui MKDIR MKLINK](res/gui_v0.3.8-RC2_green_mkdir_mklink.png)
+![Gui MKDIR MKLINK](res/gui_v1.0.0_green_mkdir_mklink_msg.png)
 ![Gui MsgBox MKDIR MKLINK](res/gui_v0.3.8-RC2_red_mkdir_mklink_msg.png)
 ![Gui Popup Menu](res/gui_v0.3.8-RC2_menu.png)
 
