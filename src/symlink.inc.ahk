@@ -29,7 +29,7 @@ cmd_remove(is_dir, path) {
 
 ;===========================
 ; Visualize future errors
-_msg(str, type:=64) {
+_msg(str, type:="info") {
     global lang
     arr := {error: 16, warning: 48, info: 64}
     MsgBox, % arr[type], % lang.msg[type], % str
