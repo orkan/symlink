@@ -23,6 +23,7 @@ lang.msg
 := { error: "Error"
    , warning: "Warning"
    , info: "Info"
+   , usage: "Usage:`n`nsymlink.exe [target] [link]"
    , sameLinkTarget: "The <Link> and <Target> are the same!"
    , notEmptyLink: "The <Link:%s> is not empty"
    , overrideLink: "The <Link:%s> is overriding existing"
