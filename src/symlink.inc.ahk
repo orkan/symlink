@@ -1,6 +1,3 @@
-;WinGetTitle, guiTitle, A
-;WinSetTitle, ahk_id %hWndGui%,, % "hWndBtnOk: " hWndBtnOk ", guiW: " guiW ", addW: " addW
-
 ;===========================
 ; save window position to ini
 save_pos() {

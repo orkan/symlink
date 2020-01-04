@@ -1,6 +1,6 @@
 #NoTrayIcon
 #SingleInstance force
-#Include ..\lib\orkan.lib.ahk
+#Include ..\lib\orkan.lib.inc.ahk
 #Include symlink.inc.ahk
 #Include symlink.ver.ahk
 #Include symlink.def.inc.ahk
