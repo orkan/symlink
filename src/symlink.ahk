@@ -24,11 +24,11 @@ Gui, Add, Text,    w%lbW% vLAB_LNK, % lang.window.link . ":"
 Gui, Add, Text,           vLAB_SRC, % lang.window.target . ":"
 Gui, Add, Edit, ys w%edW% gonChange_EDIT vEDIT_LNK ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\link3.txt
 Gui, Add, Edit,    w%edW% gonChange_EDIT vEDIT_SRC ;, D:\Orkan\Code\Exe\AutoHotkey\Symlink\test\target.txt
-; get command line args (Menu > View > Parameters (Shift+F8))
+; get command line args (SciTE: Menu > View > Parameters (Shift+F8))
 if (A_Args[1])
-    GuiControl,, EDIT_LNK, % A_Args[1]
+    GuiControl,, EDIT_SRC, % A_Args[1]
 if (A_Args[2])
-    GuiControl,, EDIT_SRC, % A_Args[2]
+    GuiControl,, EDIT_LNK, % A_Args[2]
 
 Gui, Add, Button, ys w22 h22 vBTN_LNK hwndhWndBtnLnk gonClick_BROWSE ; vBTN_LNK - for GuiControl, and hWnd for ControlGetPos - ROTFL!
 Gui, Add, Button,    w22 h22 vBTN_SRC hwndhWndBtnSrc gonClick_BROWSE ; vBTN_SRC
