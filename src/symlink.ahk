@@ -8,7 +8,7 @@
 
 base_name := "symlink"
 base_url := "https://github.com/orkan/symlink"
-version := RegExReplace(git_version, "(v[0-9]+)(\.[0-9]+)(\.[0-9]+)(-.+)?", "$1$2$4") ; only: major.minor(-RC...)
+version := get_version(git_version)
 
 ; user settings - overwrites symlink.def.inc.ahk
 name_ini := base_name . ".ini"
@@ -52,8 +52,8 @@ Gui, Add, Button, xp x+m w100 h30 vBTN_CL hwndhWndBtnCl gonClick_BTN_CL Default,
 
 Menu, menu_popup, Add, % lang.menu.alwaysOnTop, onClickMenu_alwaysOnTop
 Menu, menu_popup, Add, % lang.menu.swapLinkTarget, onClickMenu_swapLinkTarget
-Menu, menu_popup, Add, % lang.menu.help, onClickMenu_help
 Menu, menu_popup, Add
+Menu, menu_popup, Add, % lang.menu.help, onClickMenu_help
 Menu, menu_popup, Add, % lang.menu.about, onClickMenu_about
 Menu, menu_popup, Add, % lang.menu.home, onClickMenu_home
 Menu, menu_popup, % ini.wnd.top ? "Check" : "UnCheck", % lang.menu.alwaysontop
@@ -136,7 +136,6 @@ return
 
 onClickMenu_swapLinkTarget:
 Gui, Submit, NoHide
-tmp := EDIT_LNK
 GuiControl,, EDIT_LNK , % EDIT_SRC
 GuiControl,, EDIT_SRC , % EDIT_LNK
 return

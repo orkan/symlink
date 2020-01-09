@@ -19,8 +19,8 @@ merge_from_ini(obj, name) {
 ; Merge 2 objects recursively
 ; same numeric and string keys gets overwriten
 object_merge(o1, o2) {
-    for, k, v in o2
-        o1[k] := IsObject(v) ? object_merge(o1[k], v) : v
+    for, key, val in o2
+        o1[key] := IsObject(val) ? object_merge(o1[key], val) : val
     return o1
 }
 
@@ -55,6 +55,12 @@ printf(msg, args*) {
     
     msg := StrReplace(msg, "\n", "`n")
     return msg
+}
+
+;===========================
+; Shorten git tag version string to only: major.minor(-RC...)
+get_version(str) {
+    return RegExReplace(str, "(v[0-9]+)(\.[0-9]+)(\.[0-9]+)(-.+)?", "$1$2$4") ; 
 }
 
 ;###################################################################################################
