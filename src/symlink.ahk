@@ -11,10 +11,10 @@ base_url := "https://github.com/orkan/symlink"
 version := get_version(git_version)
 
 ; user settings - overwrites symlink.def.inc.ahk
-name_ini := base_name . ".ini"
-ini  := merge_from_ini(ini,  name_ini)
+name_ini := base_name ".ini"
+ini := merge_from_ini(ini, name_ini)
 ; user lang - overwrites symlink.lang.inc.ahk
-lang_ini := base_name . ".lang." . ini.wnd.lang . ".ini"
+lang_ini := base_name ".lang." ini.wnd.lang ".ini"
 lang := merge_from_ini(lang, lang_ini)
 
 edW := 478 ; initial edit width

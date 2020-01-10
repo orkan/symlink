@@ -20,7 +20,7 @@ merge_from_ini(obj, name) {
 ; same numeric and string keys gets overwriten
 object_merge(o1, o2) {
     for, key, val in o2
-        o1[key] := IsObject(val) ? object_merge(o1[key], val) : val
+        o1[key] := IsObject(val) ? object_merge(IsObject(o1[key]) ? o1[key] : [], val) : val
     return o1
 }
 
